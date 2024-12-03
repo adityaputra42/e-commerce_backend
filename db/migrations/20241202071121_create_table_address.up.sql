@@ -14,4 +14,4 @@ CREATE TABLE address (
   deleted_at timestamp NULL,
   PRIMARY KEY(id),
   FOREIGN kEY(uid) REFERENCES users(id)
-  ) engine = InnoDB;
+  );

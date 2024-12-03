@@ -9,7 +9,7 @@ CREATE TABLE users (
   created_at timestamp NOT NULL DEFAULT current_timestamp,
   deleted_at timestamp NULL,
   PRIMARY KEY (uid)  
-) engine = InnoDB;
+);
 
 
 

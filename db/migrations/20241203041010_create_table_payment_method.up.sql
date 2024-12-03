@@ -1,11 +1,11 @@
-CREATE TABLE categories (
+CREATE TABLE payment_methods (
   id bigint NOT NULL AUTO_INCREMENT,
-  product_id bigint NOT NULL,
-  name varchar(255) NOT NULL,
-  icon varchar(255) NOT NULL,
+  account_name varchar(255) NOT NULL,
+  account_number varchar(255) NOT NULL,
+  bank_name varchar(255) NOT NULL,
+  bank_icons varchar(255) NOT NULL,
   created_at timestamp NOT NULL DEFAULT current_timestamp,
   updated_at timestamp NOT NULL DEFAULT current_timestamp ON UPDATE current_timestamp,
   deleted_at timestamp NULL,
   PRIMARY KEY(id),
-  FOREIGN kEY(product_id) REFERENCES products(id)
   );
