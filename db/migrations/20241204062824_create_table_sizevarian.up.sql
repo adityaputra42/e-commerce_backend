@@ -1,8 +1,8 @@
 CREATE TABLE "size_varians" (
   "id" bigserial PRIMARY KEY,
   "color_varian_id" bigint NOT NULL,
-  "color" varchar NOT NULL,
-  "images" varchar,
+  "size" varchar NOT NULL,
+  "stock" bigint NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
