@@ -4,7 +4,7 @@ import (
 	"math/rand"
 )
 
-const charset = "0123456789"
+const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 func Generate(identifier string) string {
 	var length int = 10
