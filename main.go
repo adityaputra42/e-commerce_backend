@@ -5,6 +5,7 @@ import (
 	"log"
 
 	db "github.com/adityaputra42/e-commerce_backend/db/sqlc"
+	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/adityaputra42/e-commerce_backend/utils"
 	"github.com/jackc/pgx/v5"
 )
@@ -18,5 +19,6 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
-	db.NewStore(conn)
+	store := db.NewStore(conn)
+	routes.InitServer(config, store)
 }
