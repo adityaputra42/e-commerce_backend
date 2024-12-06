@@ -34,6 +34,7 @@ type Category struct {
 type ColorVarian struct {
 	ID        int64              `json:"id"`
 	ProductID int64              `json:"product_id"`
+	Name      string             `json:"name"`
 	Color     string             `json:"color"`
 	Images    pgtype.Text        `json:"images"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
@@ -41,30 +42,26 @@ type ColorVarian struct {
 }
 
 type Order struct {
-	ID            string `json:"id"`
-	TransactionID string `json:"transaction_id"`
-	ProductID     int64  `json:"product_id"`
-	ColorVarianID int64  `json:"color_varian_id"`
-	SizeVarianID  int64  `json:"size_varian_id"`
-	// must be positive
-	UnitPrice pgtype.Numeric `json:"unit_price"`
-	// must be positive
-	Subtotal  pgtype.Numeric     `json:"subtotal"`
-	Quantity  int64              `json:"quantity"`
-	Status    string             `json:"status"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID            string             `json:"id"`
+	TransactionID string             `json:"transaction_id"`
+	ProductID     int64              `json:"product_id"`
+	ColorVarianID int64              `json:"color_varian_id"`
+	SizeVarianID  int64              `json:"size_varian_id"`
+	UnitPrice     pgtype.Numeric     `json:"unit_price"`
+	Subtotal      pgtype.Numeric     `json:"subtotal"`
+	Quantity      int64              `json:"quantity"`
+	Status        string             `json:"status"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type Payment struct {
-	ID              int64  `json:"id"`
-	PaymentMethodID int64  `json:"payment_method_id"`
-	TransactionID   string `json:"transaction_id"`
-	// must be positive
-	TotalPayment pgtype.Numeric     `json:"total_payment"`
-	Status       string             `json:"status"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
+	ID            int64              `json:"id"`
+	TransactionID string             `json:"transaction_id"`
+	TotalPayment  pgtype.Numeric     `json:"total_payment"`
+	Status        string             `json:"status"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 }
 
 type PaymentMethod struct {
@@ -110,16 +107,15 @@ type SizeVarian struct {
 }
 
 type Transaction struct {
-	TxID       string `json:"tx_id"`
-	AddressID  int64  `json:"address_id"`
-	ShippingID int64  `json:"shipping_id"`
-	// must be positive
-	ShippingPrice pgtype.Numeric `json:"shipping_price"`
-	// must be positive
-	TotalPrice pgtype.Numeric     `json:"total_price"`
-	Status     string             `json:"status"`
-	UpdatedAt  pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt  pgtype.Timestamptz `json:"created_at"`
+	TxID            string             `json:"tx_id"`
+	AddressID       int64              `json:"address_id"`
+	ShippingID      int64              `json:"shipping_id"`
+	PaymentMethodID int64              `json:"payment_method_id"`
+	ShippingPrice   pgtype.Numeric     `json:"shipping_price"`
+	TotalPrice      pgtype.Numeric     `json:"total_price"`
+	Status          string             `json:"status"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 }
 
 type User struct {

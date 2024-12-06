@@ -8,3 +8,5 @@ CREATE TABLE "payment_method" (
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
+
+

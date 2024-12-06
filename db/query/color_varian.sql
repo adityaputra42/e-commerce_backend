@@ -1,10 +1,11 @@
 -- name: CreateColorVarianProduct :one
 INSERT INTO color_varians (
  product_id,
+ name,
  color,
  images
 ) VALUES (
-  $1, $2 ,$3
+  $1, $2 ,$3 ,$4
 )
 RETURNING *;
 
@@ -27,8 +28,9 @@ OFFSET $3;
 
 -- name: UpdateColorVarianProduct :one
 UPDATE color_varians
- set color = $2,
- images = $3
+set name = $2,
+color = $3,
+images = $4
 WHERE id = $1
 RETURNING *;
 

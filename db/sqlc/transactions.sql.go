@@ -16,20 +16,22 @@ INSERT INTO transactions (
  tx_id,
  address_id,
  shipping_id,
+ payment_method_id,
  shipping_price,
  status
 ) VALUES (
-  $1, $2 ,$3, $4, $5
+  $1, $2 ,$3, $4, $5, $6
 )
-RETURNING tx_id, address_id, shipping_id, shipping_price, total_price, status, updated_at, created_at
+RETURNING tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at
 `
 
 type CreateTransactionParams struct {
-	TxID          string         `json:"tx_id"`
-	AddressID     int64          `json:"address_id"`
-	ShippingID    int64          `json:"shipping_id"`
-	ShippingPrice pgtype.Numeric `json:"shipping_price"`
-	Status        string         `json:"status"`
+	TxID            string         `json:"tx_id"`
+	AddressID       int64          `json:"address_id"`
+	ShippingID      int64          `json:"shipping_id"`
+	PaymentMethodID int64          `json:"payment_method_id"`
+	ShippingPrice   pgtype.Numeric `json:"shipping_price"`
+	Status          string         `json:"status"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -37,6 +39,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.TxID,
 		arg.AddressID,
 		arg.ShippingID,
+		arg.PaymentMethodID,
 		arg.ShippingPrice,
 		arg.Status,
 	)
@@ -45,6 +48,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.TxID,
 		&i.AddressID,
 		&i.ShippingID,
+		&i.PaymentMethodID,
 		&i.ShippingPrice,
 		&i.TotalPrice,
 		&i.Status,
@@ -65,7 +69,7 @@ func (q *Queries) DeleteTransaction(ctx context.Context, txID string) error {
 }
 
 const getTransaction = `-- name: GetTransaction :one
-SELECT tx_id, address_id, shipping_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
+SELECT tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
 WHERE tx_id = $1 LIMIT 1
 `
 
@@ -76,6 +80,7 @@ func (q *Queries) GetTransaction(ctx context.Context, txID string) (Transaction,
 		&i.TxID,
 		&i.AddressID,
 		&i.ShippingID,
+		&i.PaymentMethodID,
 		&i.ShippingPrice,
 		&i.TotalPrice,
 		&i.Status,
@@ -86,7 +91,7 @@ func (q *Queries) GetTransaction(ctx context.Context, txID string) (Transaction,
 }
 
 const getTransactionForUpdate = `-- name: GetTransactionForUpdate :one
-SELECT tx_id, address_id, shipping_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
+SELECT tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
 WHERE tx_id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
@@ -98,6 +103,7 @@ func (q *Queries) GetTransactionForUpdate(ctx context.Context, txID string) (Tra
 		&i.TxID,
 		&i.AddressID,
 		&i.ShippingID,
+		&i.PaymentMethodID,
 		&i.ShippingPrice,
 		&i.TotalPrice,
 		&i.Status,
@@ -108,7 +114,7 @@ func (q *Queries) GetTransactionForUpdate(ctx context.Context, txID string) (Tra
 }
 
 const listTransaction = `-- name: ListTransaction :many
-SELECT tx_id, address_id, shipping_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
+SELECT tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
 ORDER BY tx_id
 LIMIT $1
 OFFSET $2
@@ -132,6 +138,7 @@ func (q *Queries) ListTransaction(ctx context.Context, arg ListTransactionParams
 			&i.TxID,
 			&i.AddressID,
 			&i.ShippingID,
+			&i.PaymentMethodID,
 			&i.ShippingPrice,
 			&i.TotalPrice,
 			&i.Status,
@@ -152,7 +159,7 @@ const updateTransaction = `-- name: UpdateTransaction :one
 UPDATE transactions
  set status = $2
 WHERE tx_id = $1
-RETURNING tx_id, address_id, shipping_id, shipping_price, total_price, status, updated_at, created_at
+RETURNING tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at
 `
 
 type UpdateTransactionParams struct {
@@ -167,6 +174,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		&i.TxID,
 		&i.AddressID,
 		&i.ShippingID,
+		&i.PaymentMethodID,
 		&i.ShippingPrice,
 		&i.TotalPrice,
 		&i.Status,

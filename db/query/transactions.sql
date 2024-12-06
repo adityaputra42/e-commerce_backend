@@ -3,10 +3,11 @@ INSERT INTO transactions (
  tx_id,
  address_id,
  shipping_id,
+ payment_method_id,
  shipping_price,
  status
 ) VALUES (
-  $1, $2 ,$3, $4, $5
+  $1, $2 ,$3, $4, $5, $6
 )
 RETURNING *;
 

@@ -1,8 +1,8 @@
-
 CREATE TABLE "transactions" (
   "tx_id" varchar PRIMARY KEY,
   "address_id" bigint NOT NULL,
   "shipping_id" bigint NOT NULL,
+  "payment_method_id" bigint NOT NULL,
   "shipping_price" decimal NOT NULL,
   "total_price" decimal NOT NULL,
   "status" varchar NOT NULL,
@@ -14,12 +14,12 @@ CREATE INDEX ON "transactions" ("address_id");
 
 CREATE INDEX ON "transactions" ("shipping_id");
 
-CREATE INDEX ON "transactions" ("address_id", "shipping_id");
+CREATE INDEX ON "transactions" ("payment_method_id");
 
-COMMENT ON COLUMN "transactions"."shipping_price" IS 'must be positive';
-
-COMMENT ON COLUMN "transactions"."total_price" IS 'must be positive';
+CREATE INDEX ON "transactions" ("address_id", "shipping_id", "payment_method_id");
 
 ALTER TABLE "transactions" ADD FOREIGN KEY ("address_id") REFERENCES "address" ("id");
 
 ALTER TABLE "transactions" ADD FOREIGN KEY ("shipping_id") REFERENCES "shippings" ("id");
+
+ALTER TABLE "transactions" ADD FOREIGN KEY ("payment_method_id") REFERENCES "payment_method" ("id");

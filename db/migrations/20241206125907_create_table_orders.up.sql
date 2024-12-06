@@ -13,7 +13,6 @@ CREATE TABLE "orders" (
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-
 CREATE INDEX ON "orders" ("transaction_id");
 
 CREATE INDEX ON "orders" ("product_id");
@@ -23,10 +22,6 @@ CREATE INDEX ON "orders" ("color_varian_id");
 CREATE INDEX ON "orders" ("size_varian_id");
 
 CREATE INDEX ON "orders" ("transaction_id", "product_id", "color_varian_id", "size_varian_id");
-
-COMMENT ON COLUMN "orders"."unit_price" IS 'must be positive';
-
-COMMENT ON COLUMN "orders"."subtotal" IS 'must be positive';
 
 ALTER TABLE "orders" ADD FOREIGN KEY ("transaction_id") REFERENCES "transactions" ("tx_id");
 

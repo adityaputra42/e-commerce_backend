@@ -1,11 +1,10 @@
 -- name: CreatePayment :one
 INSERT INTO payment (
- payment_method_id,
  transaction_id,
  total_payment,
  status
 ) VALUES (
-  $1, $2 ,$3, $4
+  $1, $2 ,$3
 )
 RETURNING *;
 

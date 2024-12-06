@@ -13,34 +13,26 @@ import (
 
 const createPayment = `-- name: CreatePayment :one
 INSERT INTO payment (
- payment_method_id,
  transaction_id,
  total_payment,
  status
 ) VALUES (
-  $1, $2 ,$3, $4
+  $1, $2 ,$3
 )
-RETURNING id, payment_method_id, transaction_id, total_payment, status, updated_at, created_at
+RETURNING id, transaction_id, total_payment, status, updated_at, created_at
 `
 
 type CreatePaymentParams struct {
-	PaymentMethodID int64          `json:"payment_method_id"`
-	TransactionID   string         `json:"transaction_id"`
-	TotalPayment    pgtype.Numeric `json:"total_payment"`
-	Status          string         `json:"status"`
+	TransactionID string         `json:"transaction_id"`
+	TotalPayment  pgtype.Numeric `json:"total_payment"`
+	Status        string         `json:"status"`
 }
 
 func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error) {
-	row := q.db.QueryRow(ctx, createPayment,
-		arg.PaymentMethodID,
-		arg.TransactionID,
-		arg.TotalPayment,
-		arg.Status,
-	)
+	row := q.db.QueryRow(ctx, createPayment, arg.TransactionID, arg.TotalPayment, arg.Status)
 	var i Payment
 	err := row.Scan(
 		&i.ID,
-		&i.PaymentMethodID,
 		&i.TransactionID,
 		&i.TotalPayment,
 		&i.Status,
@@ -61,7 +53,7 @@ func (q *Queries) DeletePayment(ctx context.Context, id int64) error {
 }
 
 const getPayment = `-- name: GetPayment :one
-SELECT id, payment_method_id, transaction_id, total_payment, status, updated_at, created_at FROM payment
+SELECT id, transaction_id, total_payment, status, updated_at, created_at FROM payment
 WHERE id = $1 LIMIT 1
 `
 
@@ -70,7 +62,6 @@ func (q *Queries) GetPayment(ctx context.Context, id int64) (Payment, error) {
 	var i Payment
 	err := row.Scan(
 		&i.ID,
-		&i.PaymentMethodID,
 		&i.TransactionID,
 		&i.TotalPayment,
 		&i.Status,
@@ -81,7 +72,7 @@ func (q *Queries) GetPayment(ctx context.Context, id int64) (Payment, error) {
 }
 
 const getPaymentForUpdate = `-- name: GetPaymentForUpdate :one
-SELECT id, payment_method_id, transaction_id, total_payment, status, updated_at, created_at FROM payment
+SELECT id, transaction_id, total_payment, status, updated_at, created_at FROM payment
 WHERE id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
@@ -91,7 +82,6 @@ func (q *Queries) GetPaymentForUpdate(ctx context.Context, id int64) (Payment, e
 	var i Payment
 	err := row.Scan(
 		&i.ID,
-		&i.PaymentMethodID,
 		&i.TransactionID,
 		&i.TotalPayment,
 		&i.Status,
@@ -102,7 +92,7 @@ func (q *Queries) GetPaymentForUpdate(ctx context.Context, id int64) (Payment, e
 }
 
 const listPayment = `-- name: ListPayment :many
-SELECT id, payment_method_id, transaction_id, total_payment, status, updated_at, created_at FROM payment
+SELECT id, transaction_id, total_payment, status, updated_at, created_at FROM payment
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -124,7 +114,6 @@ func (q *Queries) ListPayment(ctx context.Context, arg ListPaymentParams) ([]Pay
 		var i Payment
 		if err := rows.Scan(
 			&i.ID,
-			&i.PaymentMethodID,
 			&i.TransactionID,
 			&i.TotalPayment,
 			&i.Status,
@@ -145,7 +134,7 @@ const updatePayment = `-- name: UpdatePayment :one
 UPDATE payment
  set status = $2
 WHERE id = $1
-RETURNING id, payment_method_id, transaction_id, total_payment, status, updated_at, created_at
+RETURNING id, transaction_id, total_payment, status, updated_at, created_at
 `
 
 type UpdatePaymentParams struct {
@@ -158,7 +147,6 @@ func (q *Queries) UpdatePayment(ctx context.Context, arg UpdatePaymentParams) (P
 	var i Payment
 	err := row.Scan(
 		&i.ID,
-		&i.PaymentMethodID,
 		&i.TransactionID,
 		&i.TotalPayment,
 		&i.Status,

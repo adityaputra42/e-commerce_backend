@@ -1,6 +1,7 @@
 CREATE TABLE "color_varians" (
   "id" bigserial PRIMARY KEY,
   "product_id" bigint NOT NULL,
+  "name" varchar NOT NULL,
   "color" varchar NOT NULL,
   "images" varchar,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
