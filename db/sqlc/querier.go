@@ -53,6 +53,7 @@ type Querier interface {
 	GetTransactionForUpdate(ctx context.Context, txID string) (Transaction, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	GetUserForUpdate(ctx context.Context, uid string) (User, error)
+	GetUserLogin(ctx context.Context, email string) (User, error)
 	ListAddress(ctx context.Context, arg ListAddressParams) ([]Address, error)
 	ListCategories(ctx context.Context, arg ListCategoriesParams) ([]Category, error)
 	ListColorVarianProduct(ctx context.Context, arg ListColorVarianProductParams) ([]ColorVarian, error)

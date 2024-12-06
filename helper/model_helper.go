@@ -1,5 +1,10 @@
 package helper
 
+import (
+	db "github.com/adityaputra42/e-commerce_backend/db/sqlc"
+	"github.com/adityaputra42/e-commerce_backend/model/response"
+)
+
 // func ToAccountResponse(account domain.Account) response.AccountResponse {
 // 	return response.AccountResponse{
 // 		ID:        account.ID,
@@ -33,18 +38,13 @@ package helper
 
 // }
 
-// func ToUserResponse(user domain.User) response.UserResponse {
-// 	var listAccount []response.AccountResponse
+func ToUserResponse(user db.User) response.UserResponse {
 
-// 	for _, account := range user.Accounts {
-// 		listAccount = append(listAccount, ToAccountResponse(account))
-// 	}
-// 	return response.UserResponse{
-// 		ID:       user.ID,
-// 		Username: user.Username,
-// 		FullName: user.FullName,
-// 		Email:    user.Email,
-// 		Role:     user.Role,
-// 		Accounts: listAccount,
-// 	}
-// }
+	return response.UserResponse{
+		UID:      user.Uid,
+		Username: user.Username,
+		FullName: user.FullName,
+		Email:    user.Email,
+		Role:     user.Role,
+	}
+}

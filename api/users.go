@@ -1,12 +1,17 @@
 package api
 
 import (
+	"database/sql"
+	"net/http"
+
 	db "github.com/adityaputra42/e-commerce_backend/db/sqlc"
 	"github.com/adityaputra42/e-commerce_backend/helper"
 	"github.com/adityaputra42/e-commerce_backend/model"
 	"github.com/adityaputra42/e-commerce_backend/model/request"
+	"github.com/adityaputra42/e-commerce_backend/model/response"
 	"github.com/adityaputra42/e-commerce_backend/routes"
-	"github.com/gofiber/fiber"
+	"github.com/adityaputra42/e-commerce_backend/token"
+	"github.com/gofiber/fiber/v2"
 )
 
 type UserController interface {
@@ -54,7 +59,7 @@ func (u *UserControllerImpl) CreateAdmin(c *fiber.Ctx) error {
 	return c.Status(201).JSON(model.SuccessResponse{
 		Status:  201,
 		Message: "Success Create User",
-		Data:    user,
+		Data:    helper.ToUserResponse(user),
 	})
 
 }
@@ -65,8 +70,8 @@ func (u *UserControllerImpl) CreateUser(c *fiber.Ctx) error {
 
 	err := c.BodyParser(req)
 	if err != nil {
-		return c.Status(403).JSON(model.ErrorResponse{
-			Status:  403,
+		return c.Status(http.StatusBadRequest).JSON(model.ErrorResponse{
+			Status:  http.StatusBadRequest,
 			Message: "Invalid Message Body",
 		})
 	}
@@ -87,36 +92,162 @@ func (u *UserControllerImpl) CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(201).JSON(model.SuccessResponse{
-		Status:  201,
+	return c.Status(http.StatusCreated).JSON(model.SuccessResponse{
+		Status:  http.StatusCreated,
 		Message: "Success Create User",
-		Data:    user,
+		Data:    helper.ToUserResponse(user),
 	})
 }
 
 // Delete implements UserController.
 func (u *UserControllerImpl) Delete(c *fiber.Ctx) error {
-	panic("unimplemented")
+	authPayload := c.Locals(helper.GetPayloadKey()).(*token.Payload)
+	err := u.server.Store.DeleteUser(c.Context(), authPayload.Uid)
+	if err != nil {
+		return c.Status(400).JSON(model.ErrorResponse{
+			Status:  400,
+			Message: err.Error(),
+		})
+	}
+	return c.Status(200).JSON(model.ErrorResponse{
+		Status:  200,
+		Message: "Ok",
+	})
+
 }
 
 // FetchAllUSer implements UserController.
 func (u *UserControllerImpl) FetchAllUSer(c *fiber.Ctx) error {
-	panic("unimplemented")
+	userList := []response.UserResponse{}
+	users, err := u.server.Store.ListUser(c.Context(), db.ListUserParams{Role: "user"})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(model.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	for _, value := range users {
+		userList = append(userList, helper.ToUserResponse(value))
+
+	}
+	return c.Status(http.StatusOK).JSON(model.SuccessResponse{
+		Status:  http.StatusOK,
+		Message: "Ok",
+		Data:    userList,
+	})
+
 }
 
 // FetchUser implements UserController.
 func (u *UserControllerImpl) FetchUser(c *fiber.Ctx) error {
-	panic("unimplemented")
+	authPayload := c.Locals(helper.GetPayloadKey()).(*token.Payload)
+
+	response, err := u.server.Store.GetUser(c.Context(), authPayload.Username)
+	if err != nil {
+		return c.Status(400).JSON(model.ErrorResponse{
+			Status:  400,
+			Message: err.Error(),
+		})
+	}
+	return c.Status(200).JSON(model.SuccessResponse{
+		Status:  200,
+		Message: "Success",
+		Data:    helper.ToUserResponse(response),
+	})
 }
 
 // Login implements UserController.
 func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
-	panic("unimplemented")
+	req := new(request.LoginUser)
+	err := c.BodyParser(req)
+	if err != nil {
+		return c.Status(400).JSON(model.ErrorResponse{
+			Status:  400,
+			Message: "Invalid Message Body",
+		})
+	}
+
+	user, err := u.server.Store.GetUserLogin(c.Context(), req.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.Status(http.StatusNotFound).JSON(model.ErrorResponse{
+				Status:  http.StatusNotFound,
+				Message: "User not found",
+			})
+		}
+		return c.Status(http.StatusInternalServerError).JSON(model.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	match, err := helper.CheckPasswordHash(req.Password, user.Password)
+	if !match {
+		return c.Status(http.StatusInternalServerError).JSON(model.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Password didn't match",
+		})
+	}
+
+	accessToken, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, u.server.Config.AccessTokenDuration)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(model.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Password didn't match",
+		})
+	}
+
+	return c.Status(200).JSON(model.SuccessResponse{
+		Status:  200,
+		Message: "Success",
+		Data: response.LoginResponse{
+			AccessToken: accessToken,
+			User:        helper.ToUserResponse(user),
+		},
+	})
 }
 
 // UpdatePassword implements UserController.
 func (u *UserControllerImpl) UpdatePassword(c *fiber.Ctx) error {
-	panic("unimplemented")
+	req := new(request.UpdateUser)
+	authPayload := c.Locals(helper.GetPayloadKey()).(*token.Payload)
+	err := c.BodyParser(req)
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(model.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Invalid Message Body",
+		})
+	}
+
+	user, err := u.server.Store.GetUserForUpdate(c.Context(), authPayload.Uid)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(model.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+	match, err := helper.CheckPasswordHash(req.OldPassword, user.Password)
+	if !match {
+		return c.Status(http.StatusBadRequest).JSON(model.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Message: "hash and password doesn't match",
+		})
+	}
+
+	user, err = u.server.Store.UpdateUser(c.Context(), db.UpdateUserParams{Uid: user.Uid, Password: req.Password})
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(model.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+	return c.Status(http.StatusOK).JSON(model.SuccessResponse{
+		Status:  http.StatusOK,
+		Message: "Ok",
+		Data:    helper.ToUserResponse(user),
+	})
 }
 
 func NewUserController(server routes.Server) UserController {

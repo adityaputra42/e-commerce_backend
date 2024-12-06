@@ -12,17 +12,12 @@ require (
 	golang.org/x/crypto v0.27.0
 )
 
-require (
-	github.com/gofiber/fiber v1.14.6
-	github.com/gofiber/fiber/v2 v2.52.5
-)
+require github.com/gofiber/fiber/v2 v2.52.5
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/gofiber/utils v0.0.10 // indirect
-	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
