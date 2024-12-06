@@ -2,19 +2,24 @@ package helper
 
 import (
 	db "github.com/adityaputra42/e-commerce_backend/db/sqlc"
-	"github.com/adityaputra42/e-commerce_backend/model/response"
+	"github.com/adityaputra42/e-commerce_backend/dto/response"
 )
 
-// func ToAccountResponse(account domain.Account) response.AccountResponse {
-// 	return response.AccountResponse{
-// 		ID:        account.ID,
-// 		UserId:    account.UserId,
-// 		Balance:   account.Balance,
-// 		Currency:  account.Currency,
-// 		CreatedAt: account.CreatedAt,
-// 		UpdatedAt: account.UpdatedAt,
-// 	}
-// }
+func ToAddressResponse(address db.Address) response.AddressResponse {
+	return response.AddressResponse{
+		ID:                   address.ID,
+		RecipientName:        address.RecipientName,
+		RecipientPhoneNumber: address.RecipientPhoneNumber,
+		Province:             address.Province,
+		City:                 address.City,
+		District:             address.District,
+		Village:              address.Village,
+		PostalCode:           address.PostalCode,
+		FullAddress:          address.FullAddress,
+		CreatedAt:            address.CreatedAt.Time,
+		UpdatedAt:            address.UpdatedAt.Time,
+	}
+}
 
 // func ToTranferRespone(transfer domain.Transaction, from domain.Account, to domain.Account) response.TransferResponse {
 // 	return response.TransferResponse{
@@ -41,10 +46,12 @@ import (
 func ToUserResponse(user db.User) response.UserResponse {
 
 	return response.UserResponse{
-		UID:      user.Uid,
-		Username: user.Username,
-		FullName: user.FullName,
-		Email:    user.Email,
-		Role:     user.Role,
+		UID:       user.Uid,
+		Username:  user.Username,
+		FullName:  user.FullName,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt.Time,
+		UpdatedAt: user.UpdatedAt.Time,
 	}
 }

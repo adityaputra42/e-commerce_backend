@@ -1,4 +1,4 @@
-package model
+package dto
 
 type ErrorResponse struct {
 	Status  int    `json:"status"`
