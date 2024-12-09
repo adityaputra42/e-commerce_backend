@@ -80,25 +80,75 @@ func (q *Queries) DeleteOrder(ctx context.Context, id string) error {
 }
 
 const getOrder = `-- name: GetOrder :one
-SELECT id, transaction_id, product_id, color_varian_id, size_varian_id, unit_price, subtotal, quantity, status, updated_at, created_at FROM orders
-WHERE id = $1 LIMIT 1
+SELECT 
+o.id AS id, 
+o.transaction_id AS transaction_id,
+jsonb_build_object(
+        'id', p.id,
+        'name', p.name,
+        'category',(
+             SELECT jsonb_build_object(
+                    'id', c.id,
+                    'name', c.name,
+                    'icon', c.icon
+                   ) FROM categories c
+              WHERE c.id = p.category_id 
+        ),
+        'description', p.description,
+        'images',p.images,
+        'rating',p.rating,
+        'price', p.price,
+        'created_at',p.created_at,
+        'updated_at',p.updated_at,
+        'color_varian',(
+               SELECT jsonb_build_object(
+                    'id', cv.id,
+                    'name',cv.name,
+                    'color',cv.color,
+                    'images',cv.images,
+                    'created_at',cv.created_at,
+                    'updated_at',cv.updated_at
+               ) FROM color_varians cv
+          WHERE cv.id = o.color_varian_id 
+        )
+    ) AS product,
+    sv.size AS size,
+    o.subtotal AS subtotal,
+    o.quantity AS quantity,
+    o.status AS status,
+    o.created_at AS created_at,
+    o.updated_at AS updated_at
+ FROM orders o LEFT JOIN 
+    products p ON o.product_id = p.id
+    LEFT JOIN size_varians sv ON o.size_varian_id = sv.id
+WHERE o.id = $1 LIMIT 1
 `
 
-func (q *Queries) GetOrder(ctx context.Context, id string) (Order, error) {
+type GetOrderRow struct {
+	ID            string             `json:"id"`
+	TransactionID string             `json:"transaction_id"`
+	Product       []byte             `json:"product"`
+	Size          pgtype.Text        `json:"size"`
+	Subtotal      pgtype.Numeric     `json:"subtotal"`
+	Quantity      int64              `json:"quantity"`
+	Status        string             `json:"status"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) GetOrder(ctx context.Context, id string) (GetOrderRow, error) {
 	row := q.db.QueryRow(ctx, getOrder, id)
-	var i Order
+	var i GetOrderRow
 	err := row.Scan(
 		&i.ID,
 		&i.TransactionID,
-		&i.ProductID,
-		&i.ColorVarianID,
-		&i.SizeVarianID,
-		&i.UnitPrice,
+		&i.Product,
+		&i.Size,
 		&i.Subtotal,
 		&i.Quantity,
 		&i.Status,
-		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -129,8 +179,48 @@ func (q *Queries) GetOrderForUpdate(ctx context.Context, id string) (Order, erro
 }
 
 const listOrder = `-- name: ListOrder :many
-SELECT id, transaction_id, product_id, color_varian_id, size_varian_id, unit_price, subtotal, quantity, status, updated_at, created_at FROM orders
-ORDER BY id
+SELECT 
+    o.id AS id, 
+    o.transaction_id AS transaction_id,
+    jsonb_build_object(
+        'id', p.id,
+        'name', p.name,
+        'category',(
+             SELECT jsonb_build_object(
+                    'id', c.id,
+                    'name', c.name,
+                    'icon', c.icon
+                   ) FROM categories c
+              WHERE c.id = p.category_id 
+        ),
+        'description', p.description,
+        'images',p.images,
+        'rating',p.rating,
+        'price', p.price,
+        'created_at',p.created_at,
+        'updated_at',p.updated_at,
+        'color_varian',(
+               SELECT jsonb_build_object(
+                    'id', cv.id,
+                    'name',cv.name,
+                    'color',cv.color,
+                    'images',cv.images,
+                    'created_at',cv.created_at,
+                    'updated_at',cv.updated_at
+               ) FROM color_varians cv
+          WHERE cv.id = o.color_varian_id 
+        )
+    ) AS product,
+    sv.size AS size,
+    o.subtotal AS subtotal,
+    o.quantity AS quantity,
+    o.status AS status,
+    o.created_at AS created_at,
+    o.updated_at AS updated_at
+ FROM orders o LEFT JOIN 
+    products p ON o.product_id = p.id
+    LEFT JOIN size_varians sv ON o.size_varian_id = sv.id
+ORDER BY o.id
 LIMIT $1
 OFFSET $2
 `
@@ -140,27 +230,37 @@ type ListOrderParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListOrder(ctx context.Context, arg ListOrderParams) ([]Order, error) {
+type ListOrderRow struct {
+	ID            string             `json:"id"`
+	TransactionID string             `json:"transaction_id"`
+	Product       []byte             `json:"product"`
+	Size          pgtype.Text        `json:"size"`
+	Subtotal      pgtype.Numeric     `json:"subtotal"`
+	Quantity      int64              `json:"quantity"`
+	Status        string             `json:"status"`
+	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+func (q *Queries) ListOrder(ctx context.Context, arg ListOrderParams) ([]ListOrderRow, error) {
 	rows, err := q.db.Query(ctx, listOrder, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Order{}
+	items := []ListOrderRow{}
 	for rows.Next() {
-		var i Order
+		var i ListOrderRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.TransactionID,
-			&i.ProductID,
-			&i.ColorVarianID,
-			&i.SizeVarianID,
-			&i.UnitPrice,
+			&i.Product,
+			&i.Size,
 			&i.Subtotal,
 			&i.Quantity,
 			&i.Status,
-			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

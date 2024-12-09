@@ -113,9 +113,109 @@ func (q *Queries) GetProductForUpdate(ctx context.Context, id int64) (Product, e
 	return i, err
 }
 
+const getProductWithDetail = `-- name: GetProductWithDetail :one
+SELECT 
+    p.id AS product_id,
+    jsonb_build_object(
+        'id', c.id,
+        'name', c.name,
+        'icon', c.icon
+    ) AS category,
+    p.name AS name,
+    p.description AS description,
+    p.images AS images,
+    p.rating AS rating,
+    p.price AS price,
+    p.updated_at AS updated_at,
+    p.created_at AS created_at,
+    (
+        SELECT jsonb_agg(
+            jsonb_build_object(
+                'id', cv.id,
+                'product_id', cv.product_id,
+                'name', cv.name,
+                'color', cv.color,
+                'images', cv.images,
+                'updated_at', cv.updated_at,
+                'created_at', cv.created_at,
+                'size_varian', (
+                    SELECT jsonb_agg(
+                        jsonb_build_object(
+                            'id', sv.id,
+                            'color_varian_id', sv.color_varian_id,
+                            'size', sv.size,
+                            'stock', sv.stock,
+                            'updated_at', sv.updated_at,
+                            'created_at', sv.created_at
+                        )
+                    )
+                    FROM size_varians sv
+                    WHERE sv.color_varian_id = cv.id
+                )
+            )
+        )
+        FROM color_varians cv
+        WHERE cv.product_id = p.id
+    ) AS color_varian
+FROM 
+    products p
+JOIN 
+    categories c ON p.category_id = c.id
+WHERE 
+    p.id = $1
+`
+
+type GetProductWithDetailRow struct {
+	ProductID   int64              `json:"product_id"`
+	Category    []byte             `json:"category"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Images      pgtype.Text        `json:"images"`
+	Rating      pgtype.Numeric     `json:"rating"`
+	Price       pgtype.Numeric     `json:"price"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ColorVarian []byte             `json:"color_varian"`
+}
+
+func (q *Queries) GetProductWithDetail(ctx context.Context, id int64) (GetProductWithDetailRow, error) {
+	row := q.db.QueryRow(ctx, getProductWithDetail, id)
+	var i GetProductWithDetailRow
+	err := row.Scan(
+		&i.ProductID,
+		&i.Category,
+		&i.Name,
+		&i.Description,
+		&i.Images,
+		&i.Rating,
+		&i.Price,
+		&i.UpdatedAt,
+		&i.CreatedAt,
+		&i.ColorVarian,
+	)
+	return i, err
+}
+
 const listProduct = `-- name: ListProduct :many
-SELECT id, category_id, name, description, images, rating, price, updated_at, created_at FROM products
-ORDER BY id
+SELECT 
+    p.id AS product_id,
+    jsonb_build_object(
+        'id', c.id,
+        'name', c.name,
+        'icon', c.icon
+    ) AS category,
+    p.name AS name,
+    p.description AS description,
+    p.images AS images,
+    p.rating AS rating,
+    p.price AS price,
+    p.updated_at AS updated_at,
+    p.created_at AS created_at 
+FROM 
+    products p
+JOIN 
+    categories c ON p.category_id = c.id
+ORDER BY p.id
 LIMIT $1
 OFFSET $2
 `
@@ -125,18 +225,30 @@ type ListProductParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListProduct(ctx context.Context, arg ListProductParams) ([]Product, error) {
+type ListProductRow struct {
+	ProductID   int64              `json:"product_id"`
+	Category    []byte             `json:"category"`
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Images      pgtype.Text        `json:"images"`
+	Rating      pgtype.Numeric     `json:"rating"`
+	Price       pgtype.Numeric     `json:"price"`
+	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+}
+
+func (q *Queries) ListProduct(ctx context.Context, arg ListProductParams) ([]ListProductRow, error) {
 	rows, err := q.db.Query(ctx, listProduct, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Product{}
+	items := []ListProductRow{}
 	for rows.Next() {
-		var i Product
+		var i ListProductRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.CategoryID,
+			&i.ProductID,
+			&i.Category,
 			&i.Name,
 			&i.Description,
 			&i.Images,
