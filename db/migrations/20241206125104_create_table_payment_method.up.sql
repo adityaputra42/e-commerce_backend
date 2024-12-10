@@ -9,4 +9,3 @@ CREATE TABLE "payment_method" (
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
 
-

@@ -7,8 +7,7 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 const createProduct = `-- name: CreateProduct :one
@@ -26,12 +25,12 @@ RETURNING id, category_id, name, description, images, rating, price, updated_at,
 `
 
 type CreateProductParams struct {
-	CategoryID  int64          `json:"category_id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Images      pgtype.Text    `json:"images"`
-	Rating      pgtype.Numeric `json:"rating"`
-	Price       pgtype.Numeric `json:"price"`
+	CategoryID  int64   `json:"category_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Images      string  `json:"images"`
+	Rating      float64 `json:"rating"`
+	Price       float64 `json:"price"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -166,16 +165,16 @@ WHERE
 `
 
 type GetProductWithDetailRow struct {
-	ProductID   int64              `json:"product_id"`
-	Category    []byte             `json:"category"`
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Images      pgtype.Text        `json:"images"`
-	Rating      pgtype.Numeric     `json:"rating"`
-	Price       pgtype.Numeric     `json:"price"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	ColorVarian []byte             `json:"color_varian"`
+	ProductID   int64     `json:"product_id"`
+	Category    []byte    `json:"category"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Images      string    `json:"images"`
+	Rating      float64   `json:"rating"`
+	Price       float64   `json:"price"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	ColorVarian []byte    `json:"color_varian"`
 }
 
 func (q *Queries) GetProductWithDetail(ctx context.Context, id int64) (GetProductWithDetailRow, error) {
@@ -226,15 +225,15 @@ type ListProductParams struct {
 }
 
 type ListProductRow struct {
-	ProductID   int64              `json:"product_id"`
-	Category    []byte             `json:"category"`
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Images      pgtype.Text        `json:"images"`
-	Rating      pgtype.Numeric     `json:"rating"`
-	Price       pgtype.Numeric     `json:"price"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	ProductID   int64     `json:"product_id"`
+	Category    []byte    `json:"category"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Images      string    `json:"images"`
+	Rating      float64   `json:"rating"`
+	Price       float64   `json:"price"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 func (q *Queries) ListProduct(ctx context.Context, arg ListProductParams) ([]ListProductRow, error) {
@@ -280,13 +279,13 @@ RETURNING id, category_id, name, description, images, rating, price, updated_at,
 `
 
 type UpdateProductParams struct {
-	ID          int64          `json:"id"`
-	CategoryID  int64          `json:"category_id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Images      pgtype.Text    `json:"images"`
-	Rating      pgtype.Numeric `json:"rating"`
-	Price       pgtype.Numeric `json:"price"`
+	ID          int64   `json:"id"`
+	CategoryID  int64   `json:"category_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Images      string  `json:"images"`
+	Rating      float64 `json:"rating"`
+	Price       float64 `json:"price"`
 }
 
 func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error) {

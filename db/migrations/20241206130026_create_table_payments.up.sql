@@ -2,7 +2,7 @@
 CREATE TABLE "payment" (
   "id" bigserial PRIMARY KEY,
   "transaction_id" varchar NOT NULL,
-  "total_payment" decimal NOT NULL,
+  "total_payment" float NOT NULL,
   "status" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())

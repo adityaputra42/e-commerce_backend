@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCategories = `-- name: CreateCategories :one
@@ -22,8 +20,8 @@ RETURNING id, name, icon, updated_at, created_at
 `
 
 type CreateCategoriesParams struct {
-	Name string      `json:"name"`
-	Icon pgtype.Text `json:"icon"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
 }
 
 func (q *Queries) CreateCategories(ctx context.Context, arg CreateCategoriesParams) (Category, error) {
@@ -133,9 +131,9 @@ RETURNING id, name, icon, updated_at, created_at
 `
 
 type UpdateCategoriesParams struct {
-	ID   int64       `json:"id"`
-	Name string      `json:"name"`
-	Icon pgtype.Text `json:"icon"`
+	ID   int64  `json:"id"`
+	Name string `json:"name"`
+	Icon string `json:"icon"`
 }
 
 func (q *Queries) UpdateCategories(ctx context.Context, arg UpdateCategoriesParams) (Category, error) {

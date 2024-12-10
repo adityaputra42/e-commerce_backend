@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createColorVarianProduct = `-- name: CreateColorVarianProduct :one
@@ -24,10 +22,10 @@ RETURNING id, product_id, name, color, images, updated_at, created_at
 `
 
 type CreateColorVarianProductParams struct {
-	ProductID int64       `json:"product_id"`
-	Name      string      `json:"name"`
-	Color     string      `json:"color"`
-	Images    pgtype.Text `json:"images"`
+	ProductID int64  `json:"product_id"`
+	Name      string `json:"name"`
+	Color     string `json:"color"`
+	Images    string `json:"images"`
 }
 
 func (q *Queries) CreateColorVarianProduct(ctx context.Context, arg CreateColorVarianProductParams) (ColorVarian, error) {
@@ -153,10 +151,10 @@ RETURNING id, product_id, name, color, images, updated_at, created_at
 `
 
 type UpdateColorVarianProductParams struct {
-	ID     int64       `json:"id"`
-	Name   string      `json:"name"`
-	Color  string      `json:"color"`
-	Images pgtype.Text `json:"images"`
+	ID     int64  `json:"id"`
+	Name   string `json:"name"`
+	Color  string `json:"color"`
+	Images string `json:"images"`
 }
 
 func (q *Queries) UpdateColorVarianProduct(ctx context.Context, arg UpdateColorVarianProductParams) (ColorVarian, error) {

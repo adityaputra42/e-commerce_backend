@@ -1,12 +1,15 @@
+
+
 CREATE TABLE "color_varians" (
   "id" bigserial PRIMARY KEY,
   "product_id" bigint NOT NULL,
   "name" varchar NOT NULL,
   "color" varchar NOT NULL,
-  "images" varchar,
+  "images" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
+
 
 
 CREATE INDEX ON "color_varians" ("product_id");

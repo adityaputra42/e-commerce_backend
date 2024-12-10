@@ -1,25 +1,25 @@
 package request
 
+import "mime/multipart"
+
 type CreateProduct struct {
-	CategoryID  int64                      `json:"category_id"`
-	Name        string                     `json:"name"`
-	Description string                     `json:"description"`
-	Images      string                     `json:"images"`
-	Rating      float32                    `json:"rating"`
-	Price       float64                    `json:"price"`
-	ColorVarian []CreateColorVarianProduct `json:"color_varians"`
+	CategoryID  int64                 `form:"category_id"`
+	Name        string                `form:"name"`
+	Description string                `form:"description"`
+	Images      *multipart.FileHeader `form:"images"`
+	Rating      float32               `form:"rating"`
+	Price       float64               `form:"price"`
+	ColorVarian string                `form:"color_varians"`
 }
 
 type CreateColorVarianProduct struct {
-	ProductID int64                     `json:"product_id"`
-	Name      string                    `json:"name"`
-	Color     string                    `json:"color"`
-	Images    string                    `json:"images"`
-	Sizes     []CreateSizeVarianProduct `json:"sizes"`
+	Name   string `json:"name"`
+	Color  string `json:"color"`
+	Images *multipart.FileHeader
+	Sizes  string `json:"sizes"`
 }
 
 type CreateSizeVarianProduct struct {
-	ColorVarianID int64  `json:"color_varian_id"`
-	Size          string `json:"size"`
-	Stock         int64  `json:"stock"`
+	Size  string `json:"size"`
+	Stock int64  `json:"stock"`
 }

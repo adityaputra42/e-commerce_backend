@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createShipping = `-- name: CreateShipping :one
@@ -23,9 +21,9 @@ RETURNING id, name, price, state, updated_at, created_at
 `
 
 type CreateShippingParams struct {
-	Name  string         `json:"name"`
-	Price pgtype.Numeric `json:"price"`
-	State string         `json:"state"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price"`
+	State string  `json:"state"`
 }
 
 func (q *Queries) CreateShipping(ctx context.Context, arg CreateShippingParams) (Shipping, error) {
@@ -140,10 +138,10 @@ RETURNING id, name, price, state, updated_at, created_at
 `
 
 type UpdateShippingParams struct {
-	ID    int64          `json:"id"`
-	Name  string         `json:"name"`
-	Price pgtype.Numeric `json:"price"`
-	State string         `json:"state"`
+	ID    int64   `json:"id"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price"`
+	State string  `json:"state"`
 }
 
 func (q *Queries) UpdateShipping(ctx context.Context, arg UpdateShippingParams) (Shipping, error) {

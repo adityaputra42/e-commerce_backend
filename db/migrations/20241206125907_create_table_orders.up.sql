@@ -1,18 +1,16 @@
-
 CREATE TABLE "orders" (
   "id" varchar PRIMARY KEY,
   "transaction_id" varchar NOT NULL,
   "product_id" bigint NOT NULL,
   "color_varian_id" bigint NOT NULL,
   "size_varian_id" bigint NOT NULL,
-  "unit_price" decimal NOT NULL,
-  "subtotal" decimal NOT NULL,
+  "unit_price" float NOT NULL,
+  "subtotal" float NOT NULL,
   "quantity" bigint NOT NULL,
   "status" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())
 );
-
 CREATE INDEX ON "orders" ("transaction_id");
 
 CREATE INDEX ON "orders" ("product_id");

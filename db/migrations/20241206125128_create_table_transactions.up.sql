@@ -3,8 +3,8 @@ CREATE TABLE "transactions" (
   "address_id" bigint NOT NULL,
   "shipping_id" bigint NOT NULL,
   "payment_method_id" bigint NOT NULL,
-  "shipping_price" decimal NOT NULL,
-  "total_price" decimal NOT NULL,
+  "shipping_price" float NOT NULL,
+  "total_price" float NOT NULL,
   "status" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
   "created_at" timestamptz NOT NULL DEFAULT (now())

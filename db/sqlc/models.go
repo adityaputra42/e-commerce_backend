@@ -5,126 +5,126 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"time"
 )
 
 type Address struct {
-	ID                   int64              `json:"id"`
-	Uid                  string             `json:"uid"`
-	RecipientName        string             `json:"recipient_name"`
-	RecipientPhoneNumber string             `json:"recipient_phone_number"`
-	Province             string             `json:"province"`
-	City                 string             `json:"city"`
-	District             string             `json:"district"`
-	Village              string             `json:"village"`
-	PostalCode           string             `json:"postal_code"`
-	FullAddress          string             `json:"full_address"`
-	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	ID                   int64     `json:"id"`
+	Uid                  string    `json:"uid"`
+	RecipientName        string    `json:"recipient_name"`
+	RecipientPhoneNumber string    `json:"recipient_phone_number"`
+	Province             string    `json:"province"`
+	City                 string    `json:"city"`
+	District             string    `json:"district"`
+	Village              string    `json:"village"`
+	PostalCode           string    `json:"postal_code"`
+	FullAddress          string    `json:"full_address"`
+	UpdatedAt            time.Time `json:"updated_at"`
+	CreatedAt            time.Time `json:"created_at"`
 }
 
 type Category struct {
-	ID        int64              `json:"id"`
-	Name      string             `json:"name"`
-	Icon      pgtype.Text        `json:"icon"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID        int64     `json:"id"`
+	Name      string    `json:"name"`
+	Icon      string    `json:"icon"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type ColorVarian struct {
-	ID        int64              `json:"id"`
-	ProductID int64              `json:"product_id"`
-	Name      string             `json:"name"`
-	Color     string             `json:"color"`
-	Images    pgtype.Text        `json:"images"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	ID        int64     `json:"id"`
+	ProductID int64     `json:"product_id"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	Images    string    `json:"images"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Order struct {
-	ID            string             `json:"id"`
-	TransactionID string             `json:"transaction_id"`
-	ProductID     int64              `json:"product_id"`
-	ColorVarianID int64              `json:"color_varian_id"`
-	SizeVarianID  int64              `json:"size_varian_id"`
-	UnitPrice     pgtype.Numeric     `json:"unit_price"`
-	Subtotal      pgtype.Numeric     `json:"subtotal"`
-	Quantity      int64              `json:"quantity"`
-	Status        string             `json:"status"`
-	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID            string    `json:"id"`
+	TransactionID string    `json:"transaction_id"`
+	ProductID     int64     `json:"product_id"`
+	ColorVarianID int64     `json:"color_varian_id"`
+	SizeVarianID  int64     `json:"size_varian_id"`
+	UnitPrice     float64   `json:"unit_price"`
+	Subtotal      float64   `json:"subtotal"`
+	Quantity      int64     `json:"quantity"`
+	Status        string    `json:"status"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Payment struct {
-	ID            int64              `json:"id"`
-	TransactionID string             `json:"transaction_id"`
-	TotalPayment  pgtype.Numeric     `json:"total_payment"`
-	Status        string             `json:"status"`
-	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID            int64     `json:"id"`
+	TransactionID string    `json:"transaction_id"`
+	TotalPayment  float64   `json:"total_payment"`
+	Status        string    `json:"status"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type PaymentMethod struct {
-	ID            int64              `json:"id"`
-	AccountName   string             `json:"account_name"`
-	AccountNumber string             `json:"account_number"`
-	BankName      string             `json:"bank_name"`
-	BankImages    string             `json:"bank_images"`
-	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID            int64     `json:"id"`
+	AccountName   string    `json:"account_name"`
+	AccountNumber string    `json:"account_number"`
+	BankName      string    `json:"bank_name"`
+	BankImages    string    `json:"bank_images"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Product struct {
-	ID          int64          `json:"id"`
-	CategoryID  int64          `json:"category_id"`
-	Name        string         `json:"name"`
-	Description string         `json:"description"`
-	Images      pgtype.Text    `json:"images"`
-	Rating      pgtype.Numeric `json:"rating"`
+	ID          int64   `json:"id"`
+	CategoryID  int64   `json:"category_id"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Images      string  `json:"images"`
+	Rating      float64 `json:"rating"`
 	// must be positive
-	Price     pgtype.Numeric     `json:"price"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	Price     float64   `json:"price"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Shipping struct {
 	ID   int64  `json:"id"`
 	Name string `json:"name"`
 	// must be positive
-	Price     pgtype.Numeric     `json:"price"`
-	State     string             `json:"state"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	Price     float64   `json:"price"`
+	State     string    `json:"state"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type SizeVarian struct {
-	ID            int64              `json:"id"`
-	ColorVarianID int64              `json:"color_varian_id"`
-	Size          string             `json:"size"`
-	Stock         int64              `json:"stock"`
-	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt     pgtype.Timestamptz `json:"created_at"`
+	ID            int64     `json:"id"`
+	ColorVarianID int64     `json:"color_varian_id"`
+	Size          string    `json:"size"`
+	Stock         int64     `json:"stock"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 type Transaction struct {
-	TxID            string             `json:"tx_id"`
-	AddressID       int64              `json:"address_id"`
-	ShippingID      int64              `json:"shipping_id"`
-	PaymentMethodID int64              `json:"payment_method_id"`
-	ShippingPrice   pgtype.Numeric     `json:"shipping_price"`
-	TotalPrice      pgtype.Numeric     `json:"total_price"`
-	Status          string             `json:"status"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	TxID            string    `json:"tx_id"`
+	AddressID       int64     `json:"address_id"`
+	ShippingID      int64     `json:"shipping_id"`
+	PaymentMethodID int64     `json:"payment_method_id"`
+	ShippingPrice   float64   `json:"shipping_price"`
+	TotalPrice      float64   `json:"total_price"`
+	Status          string    `json:"status"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 type User struct {
-	Uid       string             `json:"uid"`
-	Username  string             `json:"username"`
-	Password  string             `json:"password"`
-	FullName  string             `json:"full_name"`
-	Email     string             `json:"email"`
-	Role      string             `json:"role"`
-	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
+	Uid       string    `json:"uid"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	FullName  string    `json:"full_name"`
+	Email     string    `json:"email"`
+	Role      string    `json:"role"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
 }

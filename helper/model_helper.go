@@ -16,8 +16,8 @@ func ToAddressResponse(address db.Address) response.AddressResponse {
 		Village:              address.Village,
 		PostalCode:           address.PostalCode,
 		FullAddress:          address.FullAddress,
-		CreatedAt:            address.CreatedAt.Time,
-		UpdatedAt:            address.UpdatedAt.Time,
+		CreatedAt:            address.CreatedAt,
+		UpdatedAt:            address.UpdatedAt,
 	}
 }
 
@@ -51,7 +51,7 @@ func ToUserResponse(user db.User) response.UserResponse {
 		FullName:  user.FullName,
 		Email:     user.Email,
 		Role:      user.Role,
-		CreatedAt: user.CreatedAt.Time,
-		UpdatedAt: user.UpdatedAt.Time,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }
