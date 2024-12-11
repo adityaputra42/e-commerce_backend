@@ -28,7 +28,7 @@ jsonb_build_object(
                     'name', c.name,
                     'icon', c.icon
                    ) FROM categories c
-              WHERE c.id = p.category_id 
+              WHERE c.id = p.category_id AND c.deleted_at IS NOT NULL
         ),
         'description', p.description,
         'images',p.images,
@@ -45,7 +45,7 @@ jsonb_build_object(
                     'created_at',cv.created_at,
                     'updated_at',cv.updated_at
                ) FROM color_varians cv
-          WHERE cv.id = o.color_varian_id 
+          WHERE cv.id = o.color_varian_id AND cv.deleted_at IS NOT NULL 
         )
     ) AS product, ( 
      SELECT jsonb_build_object(
@@ -66,15 +66,15 @@ jsonb_build_object(
     o.status AS status,
     o.created_at AS created_at,
     o.updated_at AS updated_at
- FROM orders o LEFT JOIN 
-    products p ON o.product_id = p.id
-     LEFT JOIN size_varians sv ON o.size_varian_id = sv.id
-     LEFT JOIN transactions tx ON o.transaction_id = tx.tx_id
-WHERE o.id = $1 LIMIT 1;
+     FROM orders o LEFT JOIN 
+     products p ON o.product_id = p.id AND p.deleted_at IS NOT NULL
+     LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NOT NULL
+     LEFT JOIN transactions tx ON o.transaction_id = tx.tx_id AND tx.deleted_at IS NOT NULL
+     WHERE o.id = $1 LIMIT 1 AND o.deleted_at IS NOT NULL;
 
 -- name: GetOrderForUpdate :one
 SELECT * FROM orders
-WHERE id = $1 LIMIT 1
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListOrder :many
@@ -90,7 +90,7 @@ SELECT
                     'name', c.name,
                     'icon', c.icon
                    ) FROM categories c
-              WHERE c.id = p.category_id 
+              WHERE c.id = p.category_id AND c.deleted_at IS NOT NULL
         ),
         'description', p.description,
         'images',p.images,
@@ -107,10 +107,9 @@ SELECT
                     'created_at',cv.created_at,
                     'updated_at',cv.updated_at
                ) FROM color_varians cv
-          WHERE cv.id = o.color_varian_id 
+          WHERE cv.id = o.color_varian_id AND cv.deleted_at IS NOT NULL
         )
     ) AS product,
-   
     sv.size AS size,
     o.subtotal AS subtotal,
     o.quantity AS quantity,
@@ -118,9 +117,9 @@ SELECT
     o.created_at AS created_at,
     o.updated_at AS updated_at
  FROM orders o 
- LEFT JOIN products p ON o.product_id = p.id
- LEFT JOIN size_varians sv ON o.size_varian_id = sv.id
-   
+ LEFT JOIN products p ON o.product_id = p.id AND p.deleted_at IS NOT NULL
+ LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NOT NULL
+ WHERE o.deleted_at IS NOT NULL
 ORDER BY o.id
 LIMIT $1
 OFFSET $2;
@@ -132,5 +131,6 @@ WHERE id = $1
 RETURNING *;
 
 -- name: DeleteOrder :exec
-DELETE FROM orders
+UPDATE orders
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1;

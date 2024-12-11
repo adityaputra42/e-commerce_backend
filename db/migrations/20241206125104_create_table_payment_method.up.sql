@@ -6,6 +6,7 @@ CREATE TABLE "payment_method" (
   "bank_name" varchar NOT NULL,
   "bank_images" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );
 

@@ -17,16 +17,16 @@ RETURNING *;
 
 -- name: GetAddress :one
 SELECT * FROM address
-WHERE id = $1 LIMIT 1;
+WHERE deleted_at IS NOT NULL AND  id = $1 LIMIT 1;
 
 -- name: GetAddressForUpdate :one
 SELECT * FROM address
-WHERE id = $1 LIMIT 1
+WHERE id = $1 LIMIT 1 AND deleted_at IS NOT NULL
 FOR NO KEY UPDATE;
 
 -- name: ListAddress :many
 SELECT * FROM address
-WHERE uid = $1
+WHERE deleted_at IS NOT NULL AND uid = $1
 ORDER BY id
 LIMIT $2
 OFFSET $3;
@@ -45,5 +45,6 @@ WHERE id = $1
 RETURNING *;
 
 -- name: DeleteAddress :exec
-DELETE FROM address
+Update address
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1;

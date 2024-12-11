@@ -9,7 +9,8 @@ CREATE TABLE "orders" (
   "quantity" bigint NOT NULL,
   "status" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );
 CREATE INDEX ON "orders" ("transaction_id");
 

@@ -18,7 +18,7 @@ INSERT INTO color_varians (
 ) VALUES (
   $1, $2 ,$3 ,$4
 )
-RETURNING id, product_id, name, color, images, updated_at, created_at
+RETURNING id, product_id, name, color, images, updated_at, created_at, deleted_at
 `
 
 type CreateColorVarianProductParams struct {
@@ -44,12 +44,14 @@ func (q *Queries) CreateColorVarianProduct(ctx context.Context, arg CreateColorV
 		&i.Images,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteColorVarianProduct = `-- name: DeleteColorVarianProduct :exec
-DELETE FROM color_varians
+UPDATE color_varians
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -59,8 +61,8 @@ func (q *Queries) DeleteColorVarianProduct(ctx context.Context, id int64) error 
 }
 
 const getColorVarianProduct = `-- name: GetColorVarianProduct :one
-SELECT id, product_id, name, color, images, updated_at, created_at FROM color_varians
-WHERE id = $1 LIMIT 1
+SELECT id, product_id, name, color, images, updated_at, created_at, deleted_at FROM color_varians
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 `
 
 func (q *Queries) GetColorVarianProduct(ctx context.Context, id int64) (ColorVarian, error) {
@@ -74,13 +76,14 @@ func (q *Queries) GetColorVarianProduct(ctx context.Context, id int64) (ColorVar
 		&i.Images,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getColorVarianProductForUpdate = `-- name: GetColorVarianProductForUpdate :one
-SELECT id, product_id, name, color, images, updated_at, created_at FROM color_varians
-WHERE id = $1 LIMIT 1
+SELECT id, product_id, name, color, images, updated_at, created_at, deleted_at FROM color_varians
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -95,13 +98,14 @@ func (q *Queries) GetColorVarianProductForUpdate(ctx context.Context, id int64) 
 		&i.Images,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listColorVarianProduct = `-- name: ListColorVarianProduct :many
-SELECT id, product_id, name, color, images, updated_at, created_at FROM color_varians
-WHERE product_id = $1
+SELECT id, product_id, name, color, images, updated_at, created_at, deleted_at FROM color_varians
+WHERE deleted_at IS NOT NULL AND product_id = $1
 ORDER BY id
 LIMIT $2
 OFFSET $3
@@ -130,6 +134,7 @@ func (q *Queries) ListColorVarianProduct(ctx context.Context, arg ListColorVaria
 			&i.Images,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -147,7 +152,7 @@ set name = $2,
 color = $3,
 images = $4
 WHERE id = $1
-RETURNING id, product_id, name, color, images, updated_at, created_at
+RETURNING id, product_id, name, color, images, updated_at, created_at, deleted_at
 `
 
 type UpdateColorVarianProductParams struct {
@@ -173,6 +178,7 @@ func (q *Queries) UpdateColorVarianProduct(ctx context.Context, arg UpdateColorV
 		&i.Images,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

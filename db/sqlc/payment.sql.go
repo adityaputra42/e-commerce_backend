@@ -17,7 +17,7 @@ INSERT INTO payment (
 ) VALUES (
   $1, $2 ,$3
 )
-RETURNING id, transaction_id, total_payment, status, updated_at, created_at
+RETURNING id, transaction_id, total_payment, status, updated_at, created_at, deleted_at
 `
 
 type CreatePaymentParams struct {
@@ -36,12 +36,14 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deletePayment = `-- name: DeletePayment :exec
-DELETE FROM payment
+UPDATE payment
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -51,8 +53,8 @@ func (q *Queries) DeletePayment(ctx context.Context, id int64) error {
 }
 
 const getPayment = `-- name: GetPayment :one
-SELECT id, transaction_id, total_payment, status, updated_at, created_at FROM payment
-WHERE id = $1 LIMIT 1
+SELECT id, transaction_id, total_payment, status, updated_at, created_at, deleted_at FROM payment
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 `
 
 func (q *Queries) GetPayment(ctx context.Context, id int64) (Payment, error) {
@@ -65,13 +67,14 @@ func (q *Queries) GetPayment(ctx context.Context, id int64) (Payment, error) {
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getPaymentForUpdate = `-- name: GetPaymentForUpdate :one
-SELECT id, transaction_id, total_payment, status, updated_at, created_at FROM payment
-WHERE id = $1 LIMIT 1
+SELECT id, transaction_id, total_payment, status, updated_at, created_at, deleted_at FROM payment
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -85,12 +88,14 @@ func (q *Queries) GetPaymentForUpdate(ctx context.Context, id int64) (Payment, e
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listPayment = `-- name: ListPayment :many
-SELECT id, transaction_id, total_payment, status, updated_at, created_at FROM payment
+SELECT id, transaction_id, total_payment, status, updated_at, created_at, deleted_at FROM payment
+WHERE deleted_at IS NOT NULL
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -117,6 +122,7 @@ func (q *Queries) ListPayment(ctx context.Context, arg ListPaymentParams) ([]Pay
 			&i.Status,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -132,7 +138,7 @@ const updatePayment = `-- name: UpdatePayment :one
 UPDATE payment
  set status = $2
 WHERE id = $1
-RETURNING id, transaction_id, total_payment, status, updated_at, created_at
+RETURNING id, transaction_id, total_payment, status, updated_at, created_at, deleted_at
 `
 
 type UpdatePaymentParams struct {
@@ -150,6 +156,7 @@ func (q *Queries) UpdatePayment(ctx context.Context, arg UpdatePaymentParams) (P
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

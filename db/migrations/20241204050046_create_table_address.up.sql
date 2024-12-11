@@ -12,7 +12,8 @@ CREATE TABLE "address" (
   "postal_code" varchar NOT NULL,
   "full_address" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );
 
 CREATE INDEX ON "address" ("uid");

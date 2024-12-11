@@ -17,7 +17,7 @@ INSERT INTO shippings (
 ) VALUES (
   $1, $2 ,$3
 )
-RETURNING id, name, price, state, updated_at, created_at
+RETURNING id, name, price, state, updated_at, created_at, deleted_at
 `
 
 type CreateShippingParams struct {
@@ -36,12 +36,14 @@ func (q *Queries) CreateShipping(ctx context.Context, arg CreateShippingParams) 
 		&i.State,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteShipping = `-- name: DeleteShipping :exec
-DELETE FROM shippings
+UPDATE shippings
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -51,8 +53,8 @@ func (q *Queries) DeleteShipping(ctx context.Context, id int64) error {
 }
 
 const getShipping = `-- name: GetShipping :one
-SELECT id, name, price, state, updated_at, created_at FROM shippings
-WHERE id = $1 LIMIT 1
+SELECT id, name, price, state, updated_at, created_at, deleted_at FROM shippings
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 `
 
 func (q *Queries) GetShipping(ctx context.Context, id int64) (Shipping, error) {
@@ -65,13 +67,14 @@ func (q *Queries) GetShipping(ctx context.Context, id int64) (Shipping, error) {
 		&i.State,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getShippingForUpdate = `-- name: GetShippingForUpdate :one
-SELECT id, name, price, state, updated_at, created_at FROM shippings
-WHERE id = $1 LIMIT 1
+SELECT id, name, price, state, updated_at, created_at, deleted_at FROM shippings
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -85,12 +88,14 @@ func (q *Queries) GetShippingForUpdate(ctx context.Context, id int64) (Shipping,
 		&i.State,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listShipping = `-- name: ListShipping :many
-SELECT id, name, price, state, updated_at, created_at FROM shippings
+SELECT id, name, price, state, updated_at, created_at, deleted_at FROM shippings
+WHERE deleted_at IS NOT NULL
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -117,6 +122,7 @@ func (q *Queries) ListShipping(ctx context.Context, arg ListShippingParams) ([]S
 			&i.State,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -134,7 +140,7 @@ UPDATE shippings
  price = $3,
  state = $4
 WHERE id = $1
-RETURNING id, name, price, state, updated_at, created_at
+RETURNING id, name, price, state, updated_at, created_at, deleted_at
 `
 
 type UpdateShippingParams struct {
@@ -159,6 +165,7 @@ func (q *Queries) UpdateShipping(ctx context.Context, arg UpdateShippingParams) 
 		&i.State,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

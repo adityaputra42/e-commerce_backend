@@ -10,15 +10,16 @@ RETURNING *;
 
 -- name: GetCategories :one
 SELECT * FROM categories
-WHERE id = $1 LIMIT 1;
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1;
 
 -- name: GetCategoriesForUpdate :one
 SELECT * FROM categories
-WHERE id = $1 LIMIT 1
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListCategories :many
-SELECT * FROM categories
+SELECT * FROM categories 
+WHERE deleted_at IS NOT NULL 
 ORDER BY id
 LIMIT $1
 OFFSET $2;
@@ -31,5 +32,6 @@ WHERE id = $1
 RETURNING *;
 
 -- name: DeleteCategories :exec
-DELETE FROM categories
+UPDATE categories
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1;

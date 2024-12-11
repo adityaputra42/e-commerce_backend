@@ -22,7 +22,7 @@ INSERT INTO transactions (
 ) VALUES (
   $1, $2 ,$3, $4, $5, $6, $7
 )
-RETURNING tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at
+RETURNING tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at, deleted_at
 `
 
 type CreateTransactionParams struct {
@@ -56,12 +56,14 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteTransaction = `-- name: DeleteTransaction :exec
-DELETE FROM transactions
+UPDATE transactions
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE tx_id = $1
 `
 
@@ -115,7 +117,7 @@ SELECT
                                           'name', c.name,
                                           'icon', c.icon
                                           ) FROM categories c
-                                    WHERE c.id = p.category_id 
+                                    WHERE c.id = p.category_id AND c.deleted_at IS NOT NULL
                               ),
                               'description', p.description,
                               'images',p.images,
@@ -132,7 +134,7 @@ SELECT
                                           'created_at',cv.created_at,
                                           'updated_at',cv.updated_at
                                     ) FROM color_varians cv
-                              WHERE cv.id = o.color_varian_id 
+                              WHERE cv.id = o.color_varian_id AND cv.deleted_at IS NOT NULL
                               )
                         ), 
                         'size',sv.size,
@@ -143,9 +145,9 @@ SELECT
                         'updated_at',o.updated_at
                   ) 
             ) FROM orders o
-              LEFT JOIN products p ON o.product_id = p.id
-              LEFT JOIN size_varians sv ON o.size_varian_id = sv.id
-              WHERE o.transaction_id = t.tx_id
+              LEFT JOIN products p ON o.product_id = p.id AND p.deleted_at IS NOT NULL
+              LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NOT NULL
+              WHERE o.transaction_id = t.tx_id AND o.deleted_at IS NOT NULL
             ) AS orders,
       t.shipping_price AS shipping_price,
       t.total_price AS total_price,
@@ -153,10 +155,10 @@ SELECT
       t.created_at AS created_at,
       t.updated_at AS updated_at
  FROM transactions t 
- LEFT JOIN address a ON t.address_id = a.id
- LEFT JOIN shippings s ON t.shipping_id = s.id
- LEFT JOIN payment_method pm ON t.payment_method_id = pm.id
-WHERE tx_id = $1 LIMIT 1
+ LEFT JOIN address a ON t.address_id = a.id AND a.deleted_at IS NOT NULL
+ LEFT JOIN shippings s ON t.shipping_id = s.id AND s.deleted_at IS NOT NULL
+ LEFT JOIN payment_method pm ON t.payment_method_id = pm.id AND pm.deleted_at IS NOT NULL
+ WHERE t.deleted_at IS NOT NULL AND t.tx_id = $1 LIMIT 1
 `
 
 type GetTransactionRow struct {
@@ -191,8 +193,8 @@ func (q *Queries) GetTransaction(ctx context.Context, txID string) (GetTransacti
 }
 
 const getTransactionForUpdate = `-- name: GetTransactionForUpdate :one
-SELECT tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at FROM transactions
-WHERE tx_id = $1 LIMIT 1
+SELECT tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at, deleted_at FROM transactions
+WHERE deleted_at IS NOT NULL AND tx_id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -209,6 +211,7 @@ func (q *Queries) GetTransactionForUpdate(ctx context.Context, txID string) (Tra
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -226,7 +229,8 @@ SELECT
       t.updated_at AS updated_at,
       COUNT(o.id) AS total_orders
 FROM transactions t
-LEFT JOIN orders o ON t.tx_id = o.transaction_id
+LEFT JOIN orders o ON t.tx_id = o.transaction_id AND o.deleted_at IS NOT NULL
+WHERE t.deleted_at IS NOT NULL
 GROUP BY t.tx_id
 ORDER BY t.tx_id
 LIMIT $1
@@ -286,7 +290,7 @@ const updateTransaction = `-- name: UpdateTransaction :one
 UPDATE transactions
  set status = $2
 WHERE tx_id = $1
-RETURNING tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at
+RETURNING tx_id, address_id, shipping_id, payment_method_id, shipping_price, total_price, status, updated_at, created_at, deleted_at
 `
 
 type UpdateTransactionParams struct {
@@ -307,6 +311,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		&i.Status,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

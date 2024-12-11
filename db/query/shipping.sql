@@ -10,15 +10,16 @@ RETURNING *;
 
 -- name: GetShipping :one
 SELECT * FROM shippings
-WHERE id = $1 LIMIT 1;
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1;
 
 -- name: GetShippingForUpdate :one
 SELECT * FROM shippings
-WHERE id = $1 LIMIT 1
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListShipping :many
 SELECT * FROM shippings
+WHERE deleted_at IS NOT NULL
 ORDER BY id
 LIMIT $1
 OFFSET $2;
@@ -32,5 +33,6 @@ WHERE id = $1
 RETURNING *;
 
 -- name: DeleteShipping :exec
-DELETE FROM shippings
+UPDATE shippings
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1;

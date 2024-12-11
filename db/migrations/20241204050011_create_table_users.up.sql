@@ -6,5 +6,6 @@ CREATE TABLE "users" (
   "email" varchar UNIQUE NOT NULL,
   "role" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );

@@ -53,23 +53,24 @@ SELECT
                         )
                     )
                     FROM size_varians sv
-                    WHERE sv.color_varian_id = cv.id
+                    WHERE sv.color_varian_id = cv.id AND sv.deleted_at IS NOT NULL
                 )
             )
         )
         FROM color_varians cv
-        WHERE cv.product_id = p.id
+        WHERE cv.product_id = p.id AND cv.deleted_at IS NOT NULL
     ) AS color_varian
 FROM 
     products p
 JOIN 
-    categories c ON p.category_id = c.id
+    categories c ON p.category_id = c.id AND c.deleted_at IS NOT NULL
 WHERE 
-    p.id = $1;
+p.deleted_at IS NOT NULL AND
+p.id = $1;
 
 -- name: GetProductForUpdate :one
 SELECT * FROM products
-WHERE id = $1 LIMIT 1
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListProduct :many
@@ -90,7 +91,8 @@ SELECT
 FROM 
     products p
 JOIN 
-    categories c ON p.category_id = c.id
+    categories c ON p.category_id = c.id AND c.deleted_at IS NOT NULL
+WHERE p.deleted_at IS NOT NULL
 ORDER BY p.id
 LIMIT $1
 OFFSET $2;
@@ -107,5 +109,6 @@ WHERE id = $1
 RETURNING *;
 
 -- name: DeleteProduct :exec
-DELETE FROM products
+UPDATE products
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1;

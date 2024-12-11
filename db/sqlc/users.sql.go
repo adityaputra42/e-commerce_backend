@@ -20,7 +20,7 @@ INSERT INTO users (
 ) VALUES (
   $1, $2 ,$3 ,$4,$5,$6
 )
-RETURNING uid, username, password, full_name, email, role, updated_at, created_at
+RETURNING uid, username, password, full_name, email, role, updated_at, created_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -51,12 +51,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Role,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users
+UPDATE users
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE uid = $1
 `
 
@@ -66,8 +68,8 @@ func (q *Queries) DeleteUser(ctx context.Context, uid string) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT uid, username, password, full_name, email, role, updated_at, created_at FROM users
-WHERE username = $1 LIMIT 1
+SELECT uid, username, password, full_name, email, role, updated_at, created_at, deleted_at FROM users
+WHERE deleted_at IS NOT NULL AND username = $1 LIMIT 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
@@ -82,13 +84,14 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 		&i.Role,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT uid, username, password, full_name, email, role, updated_at, created_at FROM users
-WHERE uid = $1 LIMIT 1
+SELECT uid, username, password, full_name, email, role, updated_at, created_at, deleted_at FROM users
+WHERE deleted_at IS NOT NULL AND uid = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -104,13 +107,14 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, uid string) (User, error
 		&i.Role,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getUserLogin = `-- name: GetUserLogin :one
-SELECT uid, username, password, full_name, email, role, updated_at, created_at FROM users
-WHERE email = $1 LIMIT 1
+SELECT uid, username, password, full_name, email, role, updated_at, created_at, deleted_at FROM users
+WHERE deleted_at IS NOT NULL AND email = $1 LIMIT 1
 `
 
 func (q *Queries) GetUserLogin(ctx context.Context, email string) (User, error) {
@@ -125,13 +129,14 @@ func (q *Queries) GetUserLogin(ctx context.Context, email string) (User, error) 
 		&i.Role,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listUser = `-- name: ListUser :many
-SELECT uid, username, password, full_name, email, role, updated_at, created_at FROM users
-WHERE role = $1
+SELECT uid, username, password, full_name, email, role, updated_at, created_at, deleted_at FROM users
+WHERE deleted_at IS NOT NULL AND role = $1
 ORDER BY uid 
 LIMIT $2
 OFFSET $3
@@ -161,6 +166,7 @@ func (q *Queries) ListUser(ctx context.Context, arg ListUserParams) ([]User, err
 			&i.Role,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -176,7 +182,7 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users
  set password = $2
 WHERE uid = $1
-RETURNING uid, username, password, full_name, email, role, updated_at, created_at
+RETURNING uid, username, password, full_name, email, role, updated_at, created_at, deleted_at
 `
 
 type UpdateUserParams struct {
@@ -196,6 +202,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.Role,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

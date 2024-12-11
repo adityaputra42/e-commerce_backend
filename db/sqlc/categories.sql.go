@@ -16,7 +16,7 @@ INSERT INTO categories (
 ) VALUES (
   $1, $2 
 )
-RETURNING id, name, icon, updated_at, created_at
+RETURNING id, name, icon, updated_at, created_at, deleted_at
 `
 
 type CreateCategoriesParams struct {
@@ -33,12 +33,14 @@ func (q *Queries) CreateCategories(ctx context.Context, arg CreateCategoriesPara
 		&i.Icon,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteCategories = `-- name: DeleteCategories :exec
-DELETE FROM categories
+UPDATE categories
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -48,8 +50,8 @@ func (q *Queries) DeleteCategories(ctx context.Context, id int64) error {
 }
 
 const getCategories = `-- name: GetCategories :one
-SELECT id, name, icon, updated_at, created_at FROM categories
-WHERE id = $1 LIMIT 1
+SELECT id, name, icon, updated_at, created_at, deleted_at FROM categories
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 `
 
 func (q *Queries) GetCategories(ctx context.Context, id int64) (Category, error) {
@@ -61,13 +63,14 @@ func (q *Queries) GetCategories(ctx context.Context, id int64) (Category, error)
 		&i.Icon,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getCategoriesForUpdate = `-- name: GetCategoriesForUpdate :one
-SELECT id, name, icon, updated_at, created_at FROM categories
-WHERE id = $1 LIMIT 1
+SELECT id, name, icon, updated_at, created_at, deleted_at FROM categories
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -80,12 +83,14 @@ func (q *Queries) GetCategoriesForUpdate(ctx context.Context, id int64) (Categor
 		&i.Icon,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listCategories = `-- name: ListCategories :many
-SELECT id, name, icon, updated_at, created_at FROM categories
+SELECT id, name, icon, updated_at, created_at, deleted_at FROM categories 
+WHERE deleted_at IS NOT NULL 
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -111,6 +116,7 @@ func (q *Queries) ListCategories(ctx context.Context, arg ListCategoriesParams) 
 			&i.Icon,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -127,7 +133,7 @@ UPDATE categories
  set name = $2,
  icon = $3
 WHERE id = $1
-RETURNING id, name, icon, updated_at, created_at
+RETURNING id, name, icon, updated_at, created_at, deleted_at
 `
 
 type UpdateCategoriesParams struct {
@@ -145,6 +151,7 @@ func (q *Queries) UpdateCategories(ctx context.Context, arg UpdateCategoriesPara
 		&i.Icon,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

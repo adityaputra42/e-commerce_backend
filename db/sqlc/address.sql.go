@@ -23,7 +23,7 @@ INSERT INTO address (
 ) VALUES (
   $1, $2 ,$3 ,$4,$5,$6,$7,$8,$9
 )
-RETURNING id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at
+RETURNING id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at, deleted_at
 `
 
 type CreateAddressParams struct {
@@ -64,12 +64,14 @@ func (q *Queries) CreateAddress(ctx context.Context, arg CreateAddressParams) (A
 		&i.FullAddress,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deleteAddress = `-- name: DeleteAddress :exec
-DELETE FROM address
+Update address
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -79,8 +81,8 @@ func (q *Queries) DeleteAddress(ctx context.Context, id int64) error {
 }
 
 const getAddress = `-- name: GetAddress :one
-SELECT id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at FROM address
-WHERE id = $1 LIMIT 1
+SELECT id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at, deleted_at FROM address
+WHERE deleted_at IS NOT NULL AND  id = $1 LIMIT 1
 `
 
 func (q *Queries) GetAddress(ctx context.Context, id int64) (Address, error) {
@@ -99,13 +101,14 @@ func (q *Queries) GetAddress(ctx context.Context, id int64) (Address, error) {
 		&i.FullAddress,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getAddressForUpdate = `-- name: GetAddressForUpdate :one
-SELECT id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at FROM address
-WHERE id = $1 LIMIT 1
+SELECT id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at, deleted_at FROM address
+WHERE id = $1 LIMIT 1 AND deleted_at IS NOT NULL
 FOR NO KEY UPDATE
 `
 
@@ -125,13 +128,14 @@ func (q *Queries) GetAddressForUpdate(ctx context.Context, id int64) (Address, e
 		&i.FullAddress,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listAddress = `-- name: ListAddress :many
-SELECT id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at FROM address
-WHERE uid = $1
+SELECT id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at, deleted_at FROM address
+WHERE deleted_at IS NOT NULL AND uid = $1
 ORDER BY id
 LIMIT $2
 OFFSET $3
@@ -165,6 +169,7 @@ func (q *Queries) ListAddress(ctx context.Context, arg ListAddressParams) ([]Add
 			&i.FullAddress,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -187,7 +192,7 @@ UPDATE address
  postal_code = $8,
  full_address = $9
 WHERE id = $1
-RETURNING id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at
+RETURNING id, uid, recipient_name, recipient_phone_number, province, city, district, village, postal_code, full_address, updated_at, created_at, deleted_at
 `
 
 type UpdateAddressParams struct {
@@ -228,6 +233,7 @@ func (q *Queries) UpdateAddress(ctx context.Context, arg UpdateAddressParams) (A
 		&i.FullAddress,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }

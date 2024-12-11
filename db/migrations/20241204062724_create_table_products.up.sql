@@ -8,7 +8,8 @@ CREATE TABLE "products" (
   "rating" float NOT NULL DEFAULT 0,
   "price" float NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );
 
 CREATE INDEX ON "products" ("category_id");

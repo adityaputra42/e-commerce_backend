@@ -7,7 +7,8 @@ CREATE TABLE "color_varians" (
   "color" varchar NOT NULL,
   "images" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );
 
 

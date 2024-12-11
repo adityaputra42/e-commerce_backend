@@ -7,7 +7,8 @@ CREATE TABLE "transactions" (
   "total_price" float NOT NULL,
   "status" varchar NOT NULL,
   "updated_at" timestamptz NOT NULL DEFAULT (now()),
-  "created_at" timestamptz NOT NULL DEFAULT (now())
+  "created_at" timestamptz NOT NULL DEFAULT (now()),
+  "deleted_at" timestamptz DEFAULT NULL
 );
 
 CREATE INDEX ON "transactions" ("address_id");

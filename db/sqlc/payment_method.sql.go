@@ -18,7 +18,7 @@ INSERT INTO payment_method (
 ) VALUES (
   $1, $2 ,$3, $4
 )
-RETURNING id, account_name, account_number, bank_name, bank_images, updated_at, created_at
+RETURNING id, account_name, account_number, bank_name, bank_images, updated_at, created_at, deleted_at
 `
 
 type CreatePaymentMethodParams struct {
@@ -44,12 +44,14 @@ func (q *Queries) CreatePaymentMethod(ctx context.Context, arg CreatePaymentMeth
 		&i.BankImages,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const deletePaymentMethod = `-- name: DeletePaymentMethod :exec
-DELETE FROM payment_method
+UPDATE payment_method
+SET deleted_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -59,8 +61,8 @@ func (q *Queries) DeletePaymentMethod(ctx context.Context, id int64) error {
 }
 
 const getPaymentMethod = `-- name: GetPaymentMethod :one
-SELECT id, account_name, account_number, bank_name, bank_images, updated_at, created_at FROM payment_method
-WHERE id = $1 LIMIT 1
+SELECT id, account_name, account_number, bank_name, bank_images, updated_at, created_at, deleted_at FROM payment_method
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 `
 
 func (q *Queries) GetPaymentMethod(ctx context.Context, id int64) (PaymentMethod, error) {
@@ -74,13 +76,14 @@ func (q *Queries) GetPaymentMethod(ctx context.Context, id int64) (PaymentMethod
 		&i.BankImages,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const getPaymentMethodForUpdate = `-- name: GetPaymentMethodForUpdate :one
-SELECT id, account_name, account_number, bank_name, bank_images, updated_at, created_at FROM payment_method
-WHERE id = $1 LIMIT 1
+SELECT id, account_name, account_number, bank_name, bank_images, updated_at, created_at, deleted_at FROM payment_method
+WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE
 `
 
@@ -95,12 +98,14 @@ func (q *Queries) GetPaymentMethodForUpdate(ctx context.Context, id int64) (Paym
 		&i.BankImages,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
 
 const listPaymentMethod = `-- name: ListPaymentMethod :many
-SELECT id, account_name, account_number, bank_name, bank_images, updated_at, created_at FROM payment_method
+SELECT id, account_name, account_number, bank_name, bank_images, updated_at, created_at, deleted_at FROM payment_method
+WHERE deleted_at IS NOT NULL
 ORDER BY id
 LIMIT $1
 OFFSET $2
@@ -128,6 +133,7 @@ func (q *Queries) ListPaymentMethod(ctx context.Context, arg ListPaymentMethodPa
 			&i.BankImages,
 			&i.UpdatedAt,
 			&i.CreatedAt,
+			&i.DeletedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -146,7 +152,7 @@ UPDATE payment_method
  bank_name = $4,
  bank_images = $5
 WHERE id = $1
-RETURNING id, account_name, account_number, bank_name, bank_images, updated_at, created_at
+RETURNING id, account_name, account_number, bank_name, bank_images, updated_at, created_at, deleted_at
 `
 
 type UpdatePaymentMethodParams struct {
@@ -174,6 +180,7 @@ func (q *Queries) UpdatePaymentMethod(ctx context.Context, arg UpdatePaymentMeth
 		&i.BankImages,
 		&i.UpdatedAt,
 		&i.CreatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
