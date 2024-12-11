@@ -13,10 +13,10 @@ type CreateProduct struct {
 }
 
 type CreateColorVarianProduct struct {
-	Name   string `json:"name"`
-	Color  string `json:"color"`
-	Images *multipart.FileHeader
-	Sizes  string `json:"sizes"`
+	Name   string                `json:"name"`
+	Color  string                `json:"color"`
+	Images *multipart.FileHeader `json:"-"`
+	Sizes  string                `json:"sizes"`
 }
 
 type CreateSizeVarianProduct struct {
