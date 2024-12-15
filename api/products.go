@@ -278,7 +278,10 @@ func (p *ProductControllerImpl) FetchProduct(c *fiber.Ctx) error {
 
 // UpdateProduct implements ProductController.
 func (p *ProductControllerImpl) UpdateProduct(c *fiber.Ctx) error {
-	panic("unimplemented")
+	return p.Server.Store.ExecTx(c.Context(), func(q *db.Queries) error {
+		
+		return nil
+	})
 }
 
 func NewProductController(server routes.Server) ProductController {

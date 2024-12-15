@@ -168,7 +168,6 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 			Message: "Invalid Message Body",
 		})
 	}
-
 	user, err := u.server.Store.GetUserLogin(c.Context(), req.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
