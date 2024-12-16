@@ -237,7 +237,13 @@ func (p *ProductControllerImpl) Delete(c *fiber.Ctx) error {
 
 // FetchListProduct implements ProductController.
 func (p *ProductControllerImpl) FetchListProduct(c *fiber.Ctx) error {
-	products, err := p.Server.Store.ListProduct(c.Context(), db.ListProductParams{})
+
+	page := c.QueryInt("page")
+	limit := c.QueryInt("limit", 10)
+	products, err := p.Server.Store.ListProduct(c.Context(), db.ListProductParams{
+		Limit:  int32(limit),
+		Offset: int32(page),
+	})
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
@@ -279,7 +285,7 @@ func (p *ProductControllerImpl) FetchProduct(c *fiber.Ctx) error {
 // UpdateProduct implements ProductController.
 func (p *ProductControllerImpl) UpdateProduct(c *fiber.Ctx) error {
 	return p.Server.Store.ExecTx(c.Context(), func(q *db.Queries) error {
-		
+
 		return nil
 	})
 }
