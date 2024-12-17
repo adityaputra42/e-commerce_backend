@@ -5,6 +5,7 @@ type CreateTransaction struct {
 	ShippingID      int64         `json:"shipping_id"`
 	PaymentMethodID int64         `json:"payment_method_id"`
 	ShippingPrice   float64       `json:"shipping_price"`
+	TotalPrice      float64       `json:"total_price"`
 	ProductOrders   []CreateOrder `json:"product_orders"`
 }
 

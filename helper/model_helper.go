@@ -122,3 +122,68 @@ func ToUserResponse(user db.User) response.UserResponse {
 		UpdatedAt: user.UpdatedAt,
 	}
 }
+
+func ToTransactionResponse(
+	t db.Transaction,
+	address response.AddressResponse,
+	shipping response.ShippingResponse,
+	paymentMethod response.PaymentMethodResponse,
+	productOrder []response.OrderResponse,
+) response.TransactionResponse {
+	return response.TransactionResponse{
+		TxID:          t.TxID,
+		Address:       address,
+		Shipping:      shipping,
+		PaymentMethod: paymentMethod,
+		Orders:        productOrder,
+		ShippingPrice: t.ShippingPrice,
+		TotalPrice:    t.TotalPrice,
+		Status:        t.Status,
+		CreatedAt:     t.CreatedAt,
+		UpdatedAt:     t.UpdatedAt,
+	}
+
+}
+
+func ToOrderResponse(p db.Order, size string, product response.ProductOrderResponse) response.OrderResponse {
+	return response.OrderResponse{
+		ID:            p.ID,
+		TransactionID: p.TransactionID,
+		Product:       product,
+		Size:          size,
+		UnitPrice:     p.UnitPrice,
+		Subtotal:      p.Subtotal,
+		Quantity:      p.Quantity,
+		Status:        p.Status,
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+	}
+
+}
+
+func ToProductOrderResponse(p db.Product, category response.Category, colorVarian response.ColorVarianOrderResponse) response.ProductOrderResponse {
+	return response.ProductOrderResponse{
+		ID:          p.ID,
+		Category:    category,
+		Name:        p.Name,
+		Description: p.Description,
+		Images:      p.Images,
+		Rating:      p.Rating,
+		Price:       p.Price,
+		ColorVarian: colorVarian,
+		CreatedAt:   p.CreatedAt,
+		UpdatedAt:   p.UpdatedAt,
+	}
+
+}
+
+func ToColorVarianOrderResponse(cv db.ColorVarian) response.ColorVarianOrderResponse {
+	return response.ColorVarianOrderResponse{
+		ID:        cv.ID,
+		Name:      cv.Name,
+		Color:     cv.Color,
+		Images:    cv.Images,
+		CreatedAt: cv.CreatedAt,
+		UpdatedAt: cv.UpdatedAt,
+	}
+}
