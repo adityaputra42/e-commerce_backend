@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createColorVarianProduct = `-- name: CreateColorVarianProduct :one
@@ -61,13 +62,44 @@ func (q *Queries) DeleteColorVarianProduct(ctx context.Context, id int64) error 
 }
 
 const getColorVarianProduct = `-- name: GetColorVarianProduct :one
-SELECT id, product_id, name, color, images, updated_at, created_at, deleted_at FROM color_varians
-WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
+SELECT 
+  cv.id AS id,
+  cv.product_id AS product_id,
+  cv.name AS name,
+  cv.color AS color,
+  cv.images AS images,
+  cv.updated_at AS updated_at,
+  cv.created_at AS created_at,
+  jsonb_agg(
+      jsonb_build_object(
+          'id', sv.id,
+          'color_varian_id', sv.color_varian_id,
+          'size', sv.size,
+          'stock', sv.stock,
+          'updated_at', sv.updated_at,
+          'created_at', sv.created_at
+           )
+     )AS size_varians
+ FROM color_varians cv
+LEFT JOIN 
+    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NOT NULL
+WHERE cv.deleted_at IS NOT NULL AND cv.id = $1 LIMIT 1
 `
 
-func (q *Queries) GetColorVarianProduct(ctx context.Context, id int64) (ColorVarian, error) {
+type GetColorVarianProductRow struct {
+	ID          int64     `json:"id"`
+	ProductID   int64     `json:"product_id"`
+	Name        string    `json:"name"`
+	Color       string    `json:"color"`
+	Images      string    `json:"images"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	SizeVarians []byte    `json:"size_varians"`
+}
+
+func (q *Queries) GetColorVarianProduct(ctx context.Context, id int64) (GetColorVarianProductRow, error) {
 	row := q.db.QueryRow(ctx, getColorVarianProduct, id)
-	var i ColorVarian
+	var i GetColorVarianProductRow
 	err := row.Scan(
 		&i.ID,
 		&i.ProductID,
@@ -76,7 +108,7 @@ func (q *Queries) GetColorVarianProduct(ctx context.Context, id int64) (ColorVar
 		&i.Images,
 		&i.UpdatedAt,
 		&i.CreatedAt,
-		&i.DeletedAt,
+		&i.SizeVarians,
 	)
 	return i, err
 }
@@ -104,9 +136,30 @@ func (q *Queries) GetColorVarianProductForUpdate(ctx context.Context, id int64) 
 }
 
 const listColorVarianProduct = `-- name: ListColorVarianProduct :many
-SELECT id, product_id, name, color, images, updated_at, created_at, deleted_at FROM color_varians
-WHERE deleted_at IS NOT NULL AND product_id = $1
-ORDER BY id
+SELECT 
+  cv.id AS id,
+  cv.product_id AS product_id,
+  cv.name AS name,
+  cv.color AS color,
+  cv.images AS images,
+  cv.updated_at AS updated_at,
+  cv.created_at AS created_at,
+  jsonb_agg(
+      jsonb_build_object(
+          'id', sv.id,
+          'color_varian_id', sv.color_varian_id,
+          'size', sv.size,
+          'stock', sv.stock,
+          'updated_at', sv.updated_at,
+          'created_at', sv.created_at
+           )
+     )AS size_varians
+
+FROM color_varians cv 
+LEFT JOIN 
+    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NOT NULL
+WHERE cv.deleted_at IS NOT NULL AND cv.product_id = $1
+ORDER BY cv.id
 LIMIT $2
 OFFSET $3
 `
@@ -117,15 +170,26 @@ type ListColorVarianProductParams struct {
 	Offset    int32 `json:"offset"`
 }
 
-func (q *Queries) ListColorVarianProduct(ctx context.Context, arg ListColorVarianProductParams) ([]ColorVarian, error) {
+type ListColorVarianProductRow struct {
+	ID          int64     `json:"id"`
+	ProductID   int64     `json:"product_id"`
+	Name        string    `json:"name"`
+	Color       string    `json:"color"`
+	Images      string    `json:"images"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	SizeVarians []byte    `json:"size_varians"`
+}
+
+func (q *Queries) ListColorVarianProduct(ctx context.Context, arg ListColorVarianProductParams) ([]ListColorVarianProductRow, error) {
 	rows, err := q.db.Query(ctx, listColorVarianProduct, arg.ProductID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []ColorVarian{}
+	items := []ListColorVarianProductRow{}
 	for rows.Next() {
-		var i ColorVarian
+		var i ListColorVarianProductRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProductID,
@@ -134,7 +198,7 @@ func (q *Queries) ListColorVarianProduct(ctx context.Context, arg ListColorVaria
 			&i.Images,
 			&i.UpdatedAt,
 			&i.CreatedAt,
-			&i.DeletedAt,
+			&i.SizeVarians,
 		); err != nil {
 			return nil, err
 		}

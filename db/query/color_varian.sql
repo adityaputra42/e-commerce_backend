@@ -11,8 +11,28 @@ RETURNING *;
 
 
 -- name: GetColorVarianProduct :one
-SELECT * FROM color_varians
-WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1;
+SELECT 
+  cv.id AS id,
+  cv.product_id AS product_id,
+  cv.name AS name,
+  cv.color AS color,
+  cv.images AS images,
+  cv.updated_at AS updated_at,
+  cv.created_at AS created_at,
+  jsonb_agg(
+      jsonb_build_object(
+          'id', sv.id,
+          'color_varian_id', sv.color_varian_id,
+          'size', sv.size,
+          'stock', sv.stock,
+          'updated_at', sv.updated_at,
+          'created_at', sv.created_at
+           )
+     )AS size_varians
+ FROM color_varians cv
+LEFT JOIN 
+    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NOT NULL
+WHERE cv.deleted_at IS NOT NULL AND cv.id = $1 LIMIT 1;
 
 -- name: GetColorVarianProductForUpdate :one
 SELECT * FROM color_varians
@@ -20,9 +40,30 @@ WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListColorVarianProduct :many
-SELECT * FROM color_varians
-WHERE deleted_at IS NOT NULL AND product_id = $1
-ORDER BY id
+SELECT 
+  cv.id AS id,
+  cv.product_id AS product_id,
+  cv.name AS name,
+  cv.color AS color,
+  cv.images AS images,
+  cv.updated_at AS updated_at,
+  cv.created_at AS created_at,
+  jsonb_agg(
+      jsonb_build_object(
+          'id', sv.id,
+          'color_varian_id', sv.color_varian_id,
+          'size', sv.size,
+          'stock', sv.stock,
+          'updated_at', sv.updated_at,
+          'created_at', sv.created_at
+           )
+     )AS size_varians
+
+FROM color_varians cv 
+LEFT JOIN 
+    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NOT NULL
+WHERE cv.deleted_at IS NOT NULL AND cv.product_id = $1
+ORDER BY cv.id
 LIMIT $2
 OFFSET $3 ;
 

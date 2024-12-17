@@ -16,7 +16,7 @@ type CreateColorVarianProduct struct {
 	ProductId int64                 `json:"product_id"`
 	Name      string                `json:"name"`
 	Color     string                `json:"color"`
-	Images    *multipart.FileHeader `json:"-"`
+	Images    *multipart.FileHeader `json:"images"`
 	Sizes     string                `json:"sizes"`
 }
 
@@ -30,4 +30,23 @@ type UpdateSizeVarianProduct struct {
 	ID    int64  `json:"id"`
 	Size  string `json:"size"`
 	Stock int64  `json:"stock"`
+}
+
+type UpdateColorVarianProduct struct {
+	Id     int64                 `json:"id"`
+	Name   string                `json:"name"`
+	Color  string                `json:"color"`
+	Images *multipart.FileHeader `json:"-"`
+	Sizes  string                `json:"sizes"`
+}
+
+type UpdateProduct struct {
+	ID          int64                 `form:"id"`
+	CategoryID  int64                 `form:"category_id"`
+	Name        string                `form:"name"`
+	Description string                `form:"description"`
+	Images      *multipart.FileHeader `form:"images"`
+	Rating      float32               `form:"rating"`
+	Price       float64               `form:"price"`
+	ColorVarian string                `form:"color_varians"`
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type OrderController interface {
-	Create(c *fiber.Ctx) error
+	Cancel(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
 	GetAll(c *fiber.Ctx) error
@@ -17,8 +17,8 @@ type OrderControllerImpl struct {
 	Server routes.Server
 }
 
-// Create implements OrderController.
-func (o *OrderControllerImpl) Create(c *fiber.Ctx) error {
+// Cancel implements OrderController.
+func (o *OrderControllerImpl) Cancel(c *fiber.Ctx) error {
 	panic("unimplemented")
 }
 

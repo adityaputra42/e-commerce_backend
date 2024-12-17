@@ -55,16 +55,24 @@ func (p *ProductControllerImpl) CreateProduct(c *fiber.Ctx) error {
 			})
 		}
 
-		if req.Images != nil {
-			file := req.Images
-			filePath = filepath.Join(folder, file.Filename)
-			if err = c.SaveFile(file, filePath); err != nil {
-				return c.Status(500).JSON(dto.ErrorResponse{
-					Status:  500,
-					Message: "Failed to save product image",
-				})
-			}
+		file, err := c.FormFile("images")
+		if err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "",
+			})
 		}
+
+		// if req.Images != nil {
+		// file := req.Images
+		filePath = filepath.Join(folder, file.Filename)
+		if err = c.SaveFile(file, filePath); err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "Failed to save product image",
+			})
+		}
+		// }
 
 		Category, err := q.GetCategories(c.Context(), req.CategoryID)
 		if err != nil {
@@ -138,7 +146,7 @@ func (p *ProductControllerImpl) CreateProduct(c *fiber.Ctx) error {
 				})
 			}
 
-			for i := range colorVarians {
+			for i := range sizeVarians {
 				sizeParam := db.CreateSizeVarianProductParams{
 					ColorVarianID: colorVarianResult.ID,
 					Size:          sizeVarians[i].Size,
@@ -286,7 +294,151 @@ func (p *ProductControllerImpl) FetchProduct(c *fiber.Ctx) error {
 func (p *ProductControllerImpl) UpdateProduct(c *fiber.Ctx) error {
 	return p.Server.Store.ExecTx(c.Context(), func(q *db.Queries) error {
 
-		return nil
+		req := new(request.UpdateProduct)
+		err := c.BodyParser(req)
+		if err != nil {
+			return c.Status(400).JSON(dto.ErrorResponse{
+				Status:  400,
+				Message: "Invalid form data",
+			})
+		}
+
+		produtcDetail, err := q.GetProductWithDetail(c.Context(), req.ID)
+		if err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "Failed get Category",
+			})
+		}
+
+		names := strings.Fields(req.Name)
+		var filePath string
+
+		folder := "./assets/product/" + helper.Generate(names[0])
+
+		if err := os.MkdirAll(folder, os.ModePerm); err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "Failed create directory",
+			})
+		}
+
+		file, err := c.FormFile("images")
+		if err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "",
+			})
+		}
+
+		// if req.Images != nil {
+		// file := req.Images
+		filePath = filepath.Join(folder, file.Filename)
+		if err = c.SaveFile(file, filePath); err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "Failed to save product image",
+			})
+		}
+		// }
+
+		Category, err := q.GetCategories(c.Context(), req.CategoryID)
+		if err != nil {
+			return c.Status(500).JSON(dto.ErrorResponse{
+				Status:  500,
+				Message: "Failed get Category",
+			})
+		}
+		productParam := db.UpdateProductParams{
+			ID:          produtcDetail.ProductID,
+			CategoryID:  Category.ID,
+			Name:        req.Name,
+			Description: req.Description,
+			Images:      filePath,
+			Rating:      float64(req.Rating),
+			Price:       req.Price,
+		}
+
+		productResult, err := q.UpdateProduct(c.Context(), productParam)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+				Status:  http.StatusInternalServerError,
+				Message: "Failed to Update product",
+			})
+		}
+
+		var resultColorVarians []response.ColorVarianResponse
+		var colorVarians []request.UpdateColorVarianProduct
+		if err := json.Unmarshal([]byte(req.ColorVarian), &colorVarians); err != nil {
+			return c.Status(400).JSON(dto.ErrorResponse{
+				Status:  400,
+				Message: "Invalid color_varians format",
+			})
+		}
+
+		for i := range colorVarians {
+			formFileKey := fmt.Sprintf("color_varians[%d].images", i)
+			file, err := c.FormFile(formFileKey)
+			var colorVarianPath string
+			if err == nil {
+				colorVarianPath = folder + file.Filename
+				if saveErr := c.SaveFile(file, colorVarianPath); saveErr != nil {
+					return c.Status(500).JSON(dto.ErrorResponse{
+						Status:  500,
+						Message: fmt.Sprintf("Failed to save image for color variant %d", i),
+					})
+				}
+			}
+
+			colorVarianParam := db.UpdateColorVarianProductParams{
+				ID:     colorVarians[i].Id,
+				Name:   colorVarians[i].Name,
+				Color:  colorVarians[i].Color,
+				Images: colorVarianPath,
+			}
+
+			colorVarianResult, err := q.UpdateColorVarianProduct(c.Context(), colorVarianParam)
+			if err != nil {
+				return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+					Status:  http.StatusInternalServerError,
+					Message: fmt.Sprintf("Failed to create color varian ke %d", i),
+				})
+			}
+
+			var resultSizeVarians []response.SizeVarianResponse
+			var sizeVarians []request.UpdateSizeVarianProduct
+			if err := json.Unmarshal([]byte(colorVarians[i].Sizes), &sizeVarians); err != nil {
+				return c.Status(400).JSON(dto.ErrorResponse{
+					Status:  400,
+					Message: "Invalid size_varians format",
+				})
+			}
+
+			for i := range sizeVarians {
+				sizeParam := db.UpdateSizeVarianProductParams{
+					ID:    sizeVarians[i].ID,
+					Size:  sizeVarians[i].Size,
+					Stock: sizeVarians[i].Stock,
+				}
+				size, err := q.UpdateSizeVarianProduct(c.Context(), sizeParam)
+				if err != nil {
+					return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+						Status:  http.StatusInternalServerError,
+						Message: "Failed to create size varian",
+					})
+				}
+				resultSizeVarians = append(resultSizeVarians, helper.ToSizeVarianResponse(size))
+			}
+
+			resultColorVarians = append(resultColorVarians, helper.ToColorVarianResponse(colorVarianResult, resultSizeVarians))
+
+		}
+
+		return c.Status(201).JSON(dto.SuccessResponse{
+			Status:  201,
+			Message: "Ok",
+			Data:    helper.ToProductDetailResponse(productResult, helper.ToCategoryRespone(Category), resultColorVarians),
+		})
 	})
 }
 

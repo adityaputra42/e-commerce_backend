@@ -162,7 +162,7 @@ SELECT
     ) AS color_varian
 FROM 
     products p
-JOIN 
+LEFT JOIN 
     categories c ON p.category_id = c.id AND c.deleted_at IS NOT NULL
 WHERE 
 p.deleted_at IS NOT NULL AND
