@@ -119,10 +119,10 @@ SELECT
  FROM orders o 
  LEFT JOIN products p ON o.product_id = p.id AND p.deleted_at IS NOT NULL
  LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NOT NULL
- WHERE o.deleted_at IS NOT NULL
+ WHERE o.deleted_at IS NOT NULL AND o.status = $1
 ORDER BY o.id
-LIMIT $1
-OFFSET $2;
+LIMIT $2
+OFFSET $3;
 
 -- name: UpdateOrder :one
 UPDATE orders

@@ -239,15 +239,16 @@ SELECT
  FROM orders o 
  LEFT JOIN products p ON o.product_id = p.id AND p.deleted_at IS NOT NULL
  LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NOT NULL
- WHERE o.deleted_at IS NOT NULL
+ WHERE o.deleted_at IS NOT NULL AND o.status = $1
 ORDER BY o.id
-LIMIT $1
-OFFSET $2
+LIMIT $2
+OFFSET $3
 `
 
 type ListOrderParams struct {
-	Limit  int32 `json:"limit"`
-	Offset int32 `json:"offset"`
+	Status string `json:"status"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 type ListOrderRow struct {
@@ -263,7 +264,7 @@ type ListOrderRow struct {
 }
 
 func (q *Queries) ListOrder(ctx context.Context, arg ListOrderParams) ([]ListOrderRow, error) {
-	rows, err := q.db.Query(ctx, listOrder, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listOrder, arg.Status, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

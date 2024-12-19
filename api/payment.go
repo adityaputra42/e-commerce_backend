@@ -19,7 +19,8 @@ type PaymentControllerImpl struct {
 
 // Create implements PaymentController.
 func (p *PaymentControllerImpl) Create(c *fiber.Ctx) error {
-	panic("unimplemented")
+	return nil
+
 }
 
 // Delete implements PaymentController.

@@ -128,6 +128,7 @@ func (t *TransactionsControllerImpl) Create(c *fiber.Ctx) error {
 			PaymentMethodID: paymentMethod.ID,
 			ShippingPrice:   req.ShippingPrice,
 			TotalPrice:      req.TotalPrice,
+			Status:          helper.WaitingPayment,
 		}
 		transaction, err := q.CreateTransaction(c.Context(), transactionParam)
 		if err != nil {
@@ -191,6 +192,7 @@ func (t *TransactionsControllerImpl) Create(c *fiber.Ctx) error {
 				}
 
 				orderParam := db.CreateOrderParams{
+					ID:            helper.Generate("TXO"),
 					TransactionID: transaction.TxID,
 					ProductID:     Product.ID,
 					ColorVarianID: ColorVarian.ID,
@@ -198,7 +200,7 @@ func (t *TransactionsControllerImpl) Create(c *fiber.Ctx) error {
 					UnitPrice:     v.UnitPrice,
 					Quantity:      v.Quantity,
 					Subtotal:      v.Subtotal,
-					Status:        "Created",
+					Status:        helper.Pending,
 				}
 
 				updateStockParam := db.UpdateSizeVarianProductParams{
@@ -282,12 +284,47 @@ func (t *TransactionsControllerImpl) GetAll(c *fiber.Ctx) error {
 
 // GetById implements TransactionsController.
 func (t *TransactionsControllerImpl) GetById(c *fiber.Ctx) error {
-	panic("unimplemented")
+	tx_id := c.Params("tx_id")
+	transaction, err := t.Server.Store.GetTransaction(c.Context(), tx_id)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Failed to get transaction " + err.Error(),
+		})
+	}
+	return c.Status(200).JSON(dto.SuccessResponse{
+		Status:  200,
+		Message: "Ok",
+		Data:    transaction,
+	})
+
 }
 
 // Update implements TransactionsController.
 func (t *TransactionsControllerImpl) Update(c *fiber.Ctx) error {
-	panic("unimplemented")
+	req := new(db.UpdateTransactionParams)
+
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(dto.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Message: "Invalid Message Body",
+		})
+	}
+
+	transacction, err := t.Server.Store.UpdateTransaction(c.Context(), *req)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "Failed to update transaction",
+		})
+	}
+	return c.Status(200).JSON(dto.SuccessResponse{
+		Status:  200,
+		Message: "Ok",
+		Data:    transacction,
+	})
+
 }
 
 func NewTransactionsController(server routes.Server) TransactionsController {

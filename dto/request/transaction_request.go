@@ -17,3 +17,13 @@ type CreateOrder struct {
 	Subtotal      float64 `json:"subtotal"`
 	Quantity      int64   `json:"quantity"`
 }
+
+type UpdateTransaction struct {
+	TxID   string `json:"tx_id"`
+	Status string `json:"status"`
+}
+
+type UpdateOrder struct {
+	ID     string `json:"id"`
+	Status string `json:"status"`
+}
