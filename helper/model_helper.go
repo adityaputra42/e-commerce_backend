@@ -187,3 +187,23 @@ func ToColorVarianOrderResponse(cv db.ColorVarian) response.ColorVarianOrderResp
 		UpdatedAt: cv.UpdatedAt,
 	}
 }
+
+func ToPaymentResponse(p db.Payment, tx db.Transaction) response.PaymentResponse {
+	return response.PaymentResponse{
+		ID: p.ID,
+		Transaction: response.TransactionPayment{
+			TxID:            tx.TxID,
+			AddressID:       tx.AddressID,
+			ShippingID:      tx.ShippingID,
+			PaymentMethodID: tx.PaymentMethodID,
+			TotalPrice:      tx.TotalPrice,
+			Status:          tx.Status,
+			CreatedAt:       tx.CreatedAt,
+			UpdatedAt:       tx.UpdatedAt,
+		},
+		TotalPayment: p.TotalPayment,
+		Status:       p.Status,
+		CreatedAt:    p.CreatedAt,
+		UpdatedAt:    p.UpdatedAt,
+	}
+}
