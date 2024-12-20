@@ -207,3 +207,14 @@ func ToPaymentResponse(p db.Payment, tx db.Transaction) response.PaymentResponse
 		UpdatedAt:    p.UpdatedAt,
 	}
 }
+
+func ToPaymentAdminResponse(p db.Payment) response.PaymentAdminResponse {
+	return response.PaymentAdminResponse{
+		ID:            p.ID,
+		TransactionId: p.TransactionID,
+		TotalPayment:  p.TotalPayment,
+		Status:        p.Status,
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+	}
+}

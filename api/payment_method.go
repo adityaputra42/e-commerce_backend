@@ -35,7 +35,6 @@ func (p *PaymentMethodControllerImpl) Create(c *fiber.Ctx) error {
 	param.AccountNumber = c.FormValue("account_number")
 	param.BankName = c.FormValue("bank_name")
 
-	// Ambil file dari form file
 	file, err := c.FormFile("bank_images")
 	if err != nil {
 		if err == http.ErrMissingFile {

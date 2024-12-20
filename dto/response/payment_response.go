@@ -4,6 +4,15 @@ import (
 	"time"
 )
 
+type PaymentAdminResponse struct {
+	ID            int64     `json:"id"`
+	TransactionId string    `json:"transaction_id"`
+	TotalPayment  float64   `json:"total_payment"`
+	Status        string    `json:"status"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
 type PaymentResponse struct {
 	ID           int64              `json:"id"`
 	Transaction  TransactionPayment `json:"transaction"`

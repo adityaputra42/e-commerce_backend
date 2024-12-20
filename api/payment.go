@@ -115,12 +115,61 @@ func (p *PaymentControllerImpl) Delete(c *fiber.Ctx) error {
 
 // GetAll implements PaymentController.
 func (p *PaymentControllerImpl) GetAll(c *fiber.Ctx) error {
-	panic("unimplemented")
+
+	page := c.QueryInt("page")
+	limit := c.QueryInt("limit", 10)
+
+	arg := db.ListPaymentParams{Limit: int32(limit), Offset: int32(page)}
+
+	payment, err := p.Server.Store.ListPayment(c.Context(), arg)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+	return c.Status(200).JSON(dto.SuccessResponse{
+		Status:  200,
+		Message: "Ok",
+		Data:    payment,
+	})
 }
 
 // GetById implements PaymentController.
 func (p *PaymentControllerImpl) GetById(c *fiber.Ctx) error {
-	panic("unimplemented")
+	productId := c.Params("id")
+
+	id, err := strconv.Atoi(productId)
+	if err != nil {
+		return c.Status(400).JSON(dto.ErrorResponse{
+			Status:  400,
+			Message: err.Error(),
+		})
+	}
+	payment, err := p.Server.Store.GetPayment(c.Context(), int64(id))
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	transaction, err := p.Server.Store.GetTransactionForUpdate(c.Context(), payment.TransactionID)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(200).JSON(dto.SuccessResponse{
+		Status:  200,
+		Message: "Ok",
+		Data:    helper.ToPaymentResponse(payment, transaction),
+	})
+
 }
 
 // Update implements PaymentController.
