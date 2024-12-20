@@ -13,7 +13,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,7 +25,7 @@ type ColorVarianController interface {
 }
 
 type ColorVarianControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // Create implements ColorVarianController.
@@ -326,6 +325,6 @@ func (cv *ColorVarianControllerImpl) Update(c *fiber.Ctx) error {
 	})
 }
 
-func NewColorVarianController(server routes.Server) ColorVarianController {
+func NewColorVarianController(server Server) ColorVarianController {
 	return &ColorVarianControllerImpl{Server: server}
 }

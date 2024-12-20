@@ -10,7 +10,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/adityaputra42/e-commerce_backend/token"
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,7 +24,7 @@ type AddressController interface {
 }
 
 type AddressControllerImpl struct {
-	server routes.Server
+	server Server
 }
 
 // CreateAddress implements AddressController.
@@ -226,6 +225,6 @@ func (a *AddressControllerImpl) Update(c *fiber.Ctx) error {
 	})
 }
 
-func NewAddressController(server routes.Server) AddressController {
+func NewAddressController(server Server) AddressController {
 	return &AddressControllerImpl{server: server}
 }

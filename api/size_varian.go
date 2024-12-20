@@ -9,7 +9,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,7 +21,7 @@ type SizeVarianController interface {
 }
 
 type SizeVarianControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // Create implements SizeVarianController.
@@ -197,6 +196,6 @@ func (s *SizeVarianControllerImpl) Update(c *fiber.Ctx) error {
 	})
 }
 
-func NewSizeVarianController(server routes.Server) SizeVarianController {
+func NewSizeVarianController(server Server) SizeVarianController {
 	return &SizeVarianControllerImpl{Server: server}
 }

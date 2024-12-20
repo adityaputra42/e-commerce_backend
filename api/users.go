@@ -9,7 +9,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/adityaputra42/e-commerce_backend/token"
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,7 +24,7 @@ type UserController interface {
 }
 
 type UserControllerImpl struct {
-	server routes.Server
+	server Server
 }
 
 // CreateAdmin implements UserController.
@@ -250,6 +249,6 @@ func (u *UserControllerImpl) UpdatePassword(c *fiber.Ctx) error {
 	})
 }
 
-func NewUserController(server routes.Server) UserController {
+func NewUserController(server Server) UserController {
 	return &UserControllerImpl{server: server}
 }

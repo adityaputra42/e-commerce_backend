@@ -8,7 +8,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto"
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,7 +20,7 @@ type PaymentController interface {
 }
 
 type PaymentControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // Create implements PaymentController.
@@ -216,6 +215,6 @@ func (p *PaymentControllerImpl) Update(c *fiber.Ctx) error {
 	})
 }
 
-func NewPaymentController(server routes.Server) PaymentController {
+func NewPaymentController(server Server) PaymentController {
 	return &PaymentControllerImpl{Server: server}
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type PaymentMethodController interface {
+type CategoryController interface {
 	Create(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
 	Delete(c *fiber.Ctx) error
@@ -22,19 +22,17 @@ type PaymentMethodController interface {
 	GetById(c *fiber.Ctx) error
 }
 
-type PaymentMethodControllerImpl struct {
+type CategoryControllerImpl struct {
 	Server Server
 }
 
-// Create implements PaymentMethodController.
-func (p *PaymentMethodControllerImpl) Create(c *fiber.Ctx) error {
-	var param db.CreatePaymentMethodParams
+// Create implements CategoryController.
+func (s *CategoryControllerImpl) Create(c *fiber.Ctx) error {
+	var param db.CreateCategoriesParams
 
-	param.AccountName = c.FormValue("account_name")
-	param.AccountNumber = c.FormValue("account_number")
-	param.BankName = c.FormValue("bank_name")
+	param.Name = c.FormValue("name")
 
-	file, err := c.FormFile("bank_images")
+	file, err := c.FormFile("icon")
 	if err != nil {
 		if err == http.ErrMissingFile {
 			return fmt.Errorf("bank_images is required")
@@ -59,35 +57,36 @@ func (p *PaymentMethodControllerImpl) Create(c *fiber.Ctx) error {
 		})
 
 	}
-	param.BankImages = filePath
-	paymentMethod, err := p.Server.Store.CreatePaymentMethod(c.Context(), param)
+	param.Icon = filePath
+
+	Category, err := s.Server.Store.CreateCategories(c.Context(), param)
 	if err != nil {
 		return c.Status(403).JSON(dto.ErrorResponse{
 			Status:  403,
-			Message: "Failed Create PaymentMethod",
+			Message: "Failed Create Category",
 		})
 	}
 
 	return c.Status(http.StatusCreated).JSON(dto.SuccessResponse{
 		Status:  http.StatusCreated,
-		Message: "Success Create PaymentMethod",
-		Data:    helper.ToPaymentMethodRespone(paymentMethod),
+		Message: "Success Create Category",
+		Data:    helper.ToCategoryRespone(Category),
 	})
 
 }
 
-// Delete implements PaymentMethodController.
-func (p *PaymentMethodControllerImpl) Delete(c *fiber.Ctx) error {
-	pmId := c.Params("id")
+// Delete implements CategoryController.
+func (s *CategoryControllerImpl) Delete(c *fiber.Ctx) error {
+	CategoryId := c.Params("id")
 
-	id, err := strconv.Atoi(pmId)
+	id, err := strconv.Atoi(CategoryId)
 	if err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{
 			Status:  400,
 			Message: err.Error(),
 		})
 	}
-	err = p.Server.Store.DeletePaymentMethod(c.Context(), int64(id))
+	err = s.Server.Store.DeleteCategories(c.Context(), int64(id))
 	if err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{
 			Status:  400,
@@ -100,19 +99,15 @@ func (p *PaymentMethodControllerImpl) Delete(c *fiber.Ctx) error {
 	})
 }
 
-// GetAll implements PaymentMethodController.
-func (p *PaymentMethodControllerImpl) GetAll(c *fiber.Ctx) error {
-	var ListPaymentMethod []response.PaymentMethodResponse
+// GetAll implements CategoryController.
+func (s *CategoryControllerImpl) GetAll(c *fiber.Ctx) error {
+	var Categorys []response.Category
 
 	page := c.QueryInt("page")
 	limit := c.QueryInt("limit", 10)
 
-	param := db.ListPaymentMethodParams{
-
-		Offset: int32(page),
-		Limit:  int32(limit),
-	}
-	paymentMethods, err := p.Server.Store.ListPaymentMethod(c.Context(), param)
+	arg := db.ListCategoriesParams{Limit: int32(limit), Offset: int32(page)}
+	listCategory, err := s.Server.Store.ListCategories(c.Context(), arg)
 
 	if err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{
@@ -121,29 +116,29 @@ func (p *PaymentMethodControllerImpl) GetAll(c *fiber.Ctx) error {
 		})
 	}
 
-	for _, v := range paymentMethods {
-		ListPaymentMethod = append(ListPaymentMethod, helper.ToPaymentMethodRespone(v))
+	for _, v := range listCategory {
+		Categorys = append(Categorys, helper.ToCategoryRespone(v))
 	}
 
 	return c.Status(http.StatusCreated).JSON(dto.SuccessResponse{
 		Status:  http.StatusCreated,
 		Message: "Success",
-		Data:    ListPaymentMethod,
+		Data:    Categorys,
 	})
 }
 
-// GetById implements PaymentMethodController.
-func (p *PaymentMethodControllerImpl) GetById(c *fiber.Ctx) error {
-	pmId := c.Params("id")
-	id, err := strconv.Atoi(pmId)
+// GetById implements CategoryController.
+func (s *CategoryControllerImpl) GetById(c *fiber.Ctx) error {
+	CategoryId := c.Params("id")
+
+	id, err := strconv.Atoi(CategoryId)
 	if err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{
 			Status:  400,
 			Message: err.Error(),
 		})
 	}
-
-	pm, err := p.Server.Store.GetPaymentMethod(c.Context(), int64(id))
+	Category, err := s.Server.Store.GetCategories(c.Context(), int64(id))
 
 	if err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{
@@ -155,28 +150,35 @@ func (p *PaymentMethodControllerImpl) GetById(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(dto.SuccessResponse{
 		Status:  http.StatusCreated,
 		Message: "Success",
-		Data:    helper.ToPaymentMethodRespone(pm),
+		Data:    helper.ToCategoryRespone(Category),
 	})
 }
 
-// Update implements PaymentMethodController.
-func (p *PaymentMethodControllerImpl) Update(c *fiber.Ctx) error {
-	var param db.UpdatePaymentMethodParams
-	pmId := c.FormValue("id")
-	id, err := strconv.Atoi(pmId)
+// Update implements CategoryController.
+func (s *CategoryControllerImpl) Update(c *fiber.Ctx) error {
+	var param db.UpdateCategoriesParams
+
+	id := c.FormValue("id")
+	paramId, err := strconv.Atoi(id)
 	if err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{
 			Status:  400,
 			Message: err.Error(),
 		})
 	}
-	param.ID = int64(id)
-	param.AccountName = c.FormValue("account_name")
-	param.AccountNumber = c.FormValue("account_number")
-	param.BankName = c.FormValue("bank_name")
 
-	// Ambil file dari form file
-	file, err := c.FormFile("bank_images")
+	Category, err := s.Server.Store.GetCategoriesForUpdate(c.Context(), int64(paramId))
+	if err != nil {
+		return c.Status(400).JSON(dto.ErrorResponse{
+			Status:  400,
+			Message: err.Error(),
+		})
+	}
+
+	param.ID = Category.ID
+	param.Name = c.FormValue("name")
+
+	file, err := c.FormFile("icon")
 	if err != nil {
 		if err == http.ErrMissingFile {
 			return fmt.Errorf("bank_images is required")
@@ -201,22 +203,24 @@ func (p *PaymentMethodControllerImpl) Update(c *fiber.Ctx) error {
 		})
 
 	}
-	param.BankImages = filePath
-	paymentMethod, err := p.Server.Store.UpdatePaymentMethod(c.Context(), param)
+	param.Icon = filePath
+
+	CategoryUpdate, err := s.Server.Store.UpdateCategories(c.Context(), param)
 	if err != nil {
-		return c.Status(403).JSON(dto.ErrorResponse{
-			Status:  403,
-			Message: "Failed Create PaymentMethod",
+		return c.Status(400).JSON(dto.ErrorResponse{
+			Status:  400,
+			Message: err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusCreated).JSON(dto.SuccessResponse{
-		Status:  http.StatusCreated,
-		Message: "Success Create PaymentMethod",
-		Data:    helper.ToPaymentMethodRespone(paymentMethod),
+	return c.Status(200).JSON(dto.SuccessResponse{
+		Status:  200,
+		Message: "Success",
+		Data:    helper.ToCategoryRespone(CategoryUpdate),
 	})
+
 }
 
-func NewPaymentMethodController(server Server) PaymentMethodController {
-	return &PaymentMethodControllerImpl{Server: server}
+func NewCategoryController(server Server) CategoryController {
+	return &CategoryControllerImpl{Server: server}
 }

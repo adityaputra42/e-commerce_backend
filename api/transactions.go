@@ -10,7 +10,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -23,7 +22,7 @@ type TransactionsController interface {
 }
 
 type TransactionsControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // Create implements TransactionsController.
@@ -327,6 +326,6 @@ func (t *TransactionsControllerImpl) Update(c *fiber.Ctx) error {
 
 }
 
-func NewTransactionsController(server routes.Server) TransactionsController {
+func NewTransactionsController(server Server) TransactionsController {
 	return &TransactionsControllerImpl{Server: server}
 }

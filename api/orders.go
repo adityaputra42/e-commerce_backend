@@ -7,7 +7,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto"
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,7 +19,7 @@ type OrderController interface {
 }
 
 type OrderControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // Cancel implements OrderController.
@@ -179,6 +178,6 @@ func (o *OrderControllerImpl) Update(c *fiber.Ctx) error {
 	})
 }
 
-func NewOrderController(server routes.Server) OrderController {
+func NewOrderController(server Server) OrderController {
 	return &OrderControllerImpl{Server: server}
 }

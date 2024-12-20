@@ -14,7 +14,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -27,7 +26,7 @@ type ProductController interface {
 }
 
 type ProductControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // CreateProduct implements ProductController.
@@ -442,6 +441,6 @@ func (p *ProductControllerImpl) UpdateProduct(c *fiber.Ctx) error {
 	})
 }
 
-func NewProductController(server routes.Server) ProductController {
+func NewProductController(server Server) ProductController {
 	return &ProductControllerImpl{Server: server}
 }

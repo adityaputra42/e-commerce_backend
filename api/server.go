@@ -1,4 +1,4 @@
-package routes
+package api
 
 import (
 	"fmt"
@@ -16,11 +16,11 @@ type Server struct {
 	Route      *fiber.App
 }
 
-func InitServer(config utils.Config, dbstore db.Store) error {
+func InitServer(config utils.Config, dbstore db.Store) (*Server, error) {
 
 	token, err := token.NewJWTMaker(config.SecretKey)
 	if err != nil {
-		return fmt.Errorf("cannot create token maker %w", err)
+		return nil, fmt.Errorf("cannot create token maker %w", err)
 	}
 
 	app := fiber.New()
@@ -32,14 +32,24 @@ func InitServer(config utils.Config, dbstore db.Store) error {
 	}
 
 	server.RouteInit()
-	return app.Listen(config.ServerAddress)
+
+	return server, nil
 }
 
 func (server *Server) RouteInit() {
+	UserController := NewUserController(*server)
 
-	server.Route.Group("/api/v1")
+	api := server.Route.Group("/api/v1")
+
 	{
+		api.Post("/register", UserController.CreateUser)
+		api.Post("/login", UserController.Login)
+		api.Post("/admin/register", UserController.CreateAdmin)
 
 	}
+
+}
+func (server *Server) Start(address string) error {
+	return server.Route.Listen(address)
 
 }

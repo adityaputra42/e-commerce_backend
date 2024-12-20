@@ -9,7 +9,6 @@ import (
 	"github.com/adityaputra42/e-commerce_backend/dto/request"
 	"github.com/adityaputra42/e-commerce_backend/dto/response"
 	"github.com/adityaputra42/e-commerce_backend/helper"
-	"github.com/adityaputra42/e-commerce_backend/routes"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,7 +21,7 @@ type ShippingController interface {
 }
 
 type ShippingControllerImpl struct {
-	Server routes.Server
+	Server Server
 }
 
 // Create implements ShippingController.
@@ -174,6 +173,6 @@ func (s *ShippingControllerImpl) Update(c *fiber.Ctx) error {
 
 }
 
-func NewShippingController(server routes.Server) ShippingController {
+func NewShippingController(server Server) ShippingController {
 	return &ShippingControllerImpl{Server: server}
 }
