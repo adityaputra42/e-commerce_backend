@@ -227,7 +227,7 @@ func (cv *ColorVarianControllerImpl) GetById(c *fiber.Ctx) error {
 // Update implements ColorVarianController.
 func (cv *ColorVarianControllerImpl) Update(c *fiber.Ctx) error {
 	return cv.Server.Store.ExecTx(c.Context(), func(q *db.Queries) error {
-		productId := c.Params("id")
+		productId := c.Params("product_id")
 
 		id, err := strconv.Atoi(productId)
 		if err != nil {

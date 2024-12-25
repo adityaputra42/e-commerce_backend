@@ -81,7 +81,7 @@ func (u *UserControllerImpl) CreateUser(c *fiber.Ctx) error {
 		Email:    req.Email,
 		Username: req.Username,
 		Password: req.Password,
-		Role:     "user",
+		Role:     "member",
 	}
 	user, err := u.server.Store.CreateUser(c.Context(), userParam)
 	if err != nil {
@@ -189,7 +189,7 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	accessToken, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, u.server.Config.AccessTokenDuration)
+	accessToken, _, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.AccessTokenDuration)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
