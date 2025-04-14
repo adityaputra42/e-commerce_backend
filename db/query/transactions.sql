@@ -58,7 +58,7 @@ SELECT
                                           'name', c.name,
                                           'icon', c.icon
                                           ) FROM categories c
-                                    WHERE c.id = p.category_id AND c.deleted_at IS NOT NULL
+                                    WHERE c.id = p.category_id AND c.deleted_at IS NULL
                               ),
                               'description', p.description,
                               'images',p.images,
@@ -75,7 +75,7 @@ SELECT
                                           'created_at',cv.created_at,
                                           'updated_at',cv.updated_at
                                     ) FROM color_varians cv
-                              WHERE cv.id = o.color_varian_id AND cv.deleted_at IS NOT NULL
+                              WHERE cv.id = o.color_varian_id AND cv.deleted_at IS NULL
                               )
                         ), 
                         'size',sv.size,
@@ -86,9 +86,9 @@ SELECT
                         'updated_at',o.updated_at
                   ) 
             ) FROM orders o
-              LEFT JOIN products p ON o.product_id = p.id AND p.deleted_at IS NOT NULL
-              LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NOT NULL
-              WHERE o.transaction_id = t.tx_id AND o.deleted_at IS NOT NULL
+              LEFT JOIN products p ON o.product_id = p.id AND p.deleted_at IS NULL
+              LEFT JOIN size_varians sv ON o.size_varian_id = sv.id AND sv.deleted_at IS NULL
+              WHERE o.transaction_id = t.tx_id AND o.deleted_at IS NULL
             ) AS orders,
       t.shipping_price AS shipping_price,
       t.total_price AS total_price,
@@ -96,14 +96,14 @@ SELECT
       t.created_at AS created_at,
       t.updated_at AS updated_at
  FROM transactions t 
- LEFT JOIN address a ON t.address_id = a.id AND a.deleted_at IS NOT NULL
- LEFT JOIN shippings s ON t.shipping_id = s.id AND s.deleted_at IS NOT NULL
- LEFT JOIN payment_method pm ON t.payment_method_id = pm.id AND pm.deleted_at IS NOT NULL
- WHERE t.deleted_at IS NOT NULL AND t.tx_id = $1 LIMIT 1;
+ LEFT JOIN address a ON t.address_id = a.id AND a.deleted_at IS NULL
+ LEFT JOIN shippings s ON t.shipping_id = s.id AND s.deleted_at IS NULL
+ LEFT JOIN payment_method pm ON t.payment_method_id = pm.id AND pm.deleted_at IS NULL
+ WHERE t.deleted_at IS NULL AND t.tx_id = $1 LIMIT 1;
 
 -- name: GetTransactionForUpdate :one
 SELECT * FROM transactions
-WHERE deleted_at IS NOT NULL AND tx_id = $1 LIMIT 1
+WHERE deleted_at IS NULL AND tx_id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListTransaction :many
@@ -119,8 +119,8 @@ SELECT
       t.updated_at AS updated_at,
       COUNT(o.id) AS total_orders
 FROM transactions t
-LEFT JOIN orders o ON t.tx_id = o.transaction_id AND o.deleted_at IS NOT NULL
-WHERE t.deleted_at IS NOT NULL
+LEFT JOIN orders o ON t.tx_id = o.transaction_id AND o.deleted_at IS NULL
+WHERE t.deleted_at IS NULL
 GROUP BY t.tx_id
 ORDER BY t.tx_id
 LIMIT $1

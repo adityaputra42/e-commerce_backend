@@ -11,16 +11,16 @@ RETURNING *;
 
 -- name: GetPayment :one
 SELECT * FROM payment
-WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1;
+WHERE deleted_at IS NULL AND id = $1 LIMIT 1;
 
 -- name: GetPaymentForUpdate :one
 SELECT * FROM payment
-WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
+WHERE deleted_at IS NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListPayment :many
 SELECT * FROM payment
-WHERE deleted_at IS NOT NULL
+WHERE deleted_at IS NULL
 ORDER BY id
 LIMIT $1
 OFFSET $2;

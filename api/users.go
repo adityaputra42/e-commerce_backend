@@ -39,12 +39,23 @@ func (u *UserControllerImpl) CreateAdmin(c *fiber.Ctx) error {
 		})
 	}
 
+
+	hasPassword, err  := helper.HashPassword(req.Password)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+
 	userParam := db.CreateUserParams{
 		Uid:      helper.Generate("UID"),
 		FullName: req.FullName,
 		Email:    req.Email,
 		Username: req.Username,
-		Password: req.Password,
+		Password: hasPassword,
 		Role:     "admin",
 	}
 	user, err := u.server.Store.CreateUser(c.Context(), userParam)
@@ -75,12 +86,21 @@ func (u *UserControllerImpl) CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
+	hasPassword, err  := helper.HashPassword(req.Password)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
 	userParam := db.CreateUserParams{
 		Uid:      helper.Generate("UID"),
 		FullName: req.FullName,
 		Email:    req.Email,
 		Username: req.Username,
-		Password: req.Password,
+		Password: hasPassword,
 		Role:     "member",
 	}
 	user, err := u.server.Store.CreateUser(c.Context(), userParam)
@@ -181,21 +201,22 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	match,  err:= helper.CheckPasswordHash(req.Password, user.Password)
-	
-	if !match || err != nil{
+	err = helper.CheckPassword(req.Password, user.Password);  
+	if err!= nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
-			Message: "Password didn't match",
+			Message: err.Error(),
 		})
 	}
+
+
 
 	accessToken, _, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.AccessTokenDuration)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
-			Message: "Password didn't match",
+			Message: err.Error(),
 		})
 	}
 
@@ -228,8 +249,8 @@ func (u *UserControllerImpl) UpdatePassword(c *fiber.Ctx) error {
 			Message: err.Error(),
 		})
 	}
-	match, err := helper.CheckPasswordHash(req.OldPassword, user.Password)
-	if !match || err != nil {
+	err = helper.CheckPassword(req.OldPassword, user.Password)
+	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(dto.ErrorResponse{
 			Status:  http.StatusBadRequest,
 			Message: "hash and password doesn't match",

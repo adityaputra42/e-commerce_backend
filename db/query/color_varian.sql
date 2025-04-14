@@ -31,12 +31,12 @@ SELECT
      )AS size_varians
  FROM color_varians cv
 LEFT JOIN 
-    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NOT NULL
-WHERE cv.deleted_at IS NOT NULL AND cv.id = $1 LIMIT 1;
+    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NULL
+WHERE cv.deleted_at IS NULL AND cv.id = $1 LIMIT 1;
 
 -- name: GetColorVarianProductForUpdate :one
 SELECT * FROM color_varians
-WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
+WHERE deleted_at IS NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListColorVarianProduct :many
@@ -61,8 +61,8 @@ SELECT
 
 FROM color_varians cv 
 LEFT JOIN 
-    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NOT NULL
-WHERE cv.deleted_at IS NOT NULL AND cv.product_id = $1
+    size_varians sv ON cv.id = sv.color_varian_id AND sv.deleted_at IS NULL
+WHERE cv.deleted_at IS NULL AND cv.product_id = $1
 ORDER BY cv.id
 LIMIT $2
 OFFSET $3 ;

@@ -53,24 +53,24 @@ SELECT
                         )
                     )
                     FROM size_varians sv
-                    WHERE sv.color_varian_id = cv.id AND sv.deleted_at IS NOT NULL
+                    WHERE sv.color_varian_id = cv.id AND sv.deleted_at IS NULL
                 )
             )
         )
         FROM color_varians cv
-        WHERE cv.product_id = p.id AND cv.deleted_at IS NOT NULL
+        WHERE cv.product_id = p.id AND cv.deleted_at IS NULL
     ) AS color_varian
 FROM 
     products p
 LEFT JOIN 
-    categories c ON p.category_id = c.id AND c.deleted_at IS NOT NULL
+    categories c ON p.category_id = c.id AND c.deleted_at IS NULL
 WHERE 
-p.deleted_at IS NOT NULL AND
+p.deleted_at IS NULL AND
 p.id = $1;
 
 -- name: GetProductForUpdate :one
 SELECT * FROM products
-WHERE deleted_at IS NOT NULL AND id = $1 LIMIT 1
+WHERE deleted_at IS NULL AND id = $1 LIMIT 1
 FOR NO KEY UPDATE;
 
 -- name: ListProduct :many
@@ -91,8 +91,8 @@ SELECT
 FROM 
     products p
 JOIN 
-    categories c ON p.category_id = c.id AND c.deleted_at IS NOT NULL
-WHERE p.deleted_at IS NOT NULL
+    categories c ON p.category_id = c.id AND c.deleted_at IS NULL
+WHERE p.deleted_at IS NULL
 ORDER BY p.id
 LIMIT $1
 OFFSET $2;
