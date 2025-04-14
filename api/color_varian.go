@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -66,7 +65,7 @@ func (cv *ColorVarianControllerImpl) Create(c *fiber.Ctx) error {
 			if saveErr := c.SaveFile(file, colorVarianPath); saveErr != nil {
 				return c.Status(500).JSON(dto.ErrorResponse{
 					Status:  500,
-					Message: fmt.Sprintf("Failed to save image for color variant"),
+					Message: "Failed to save image for color variant",
 				})
 			}
 		}
@@ -82,7 +81,7 @@ func (cv *ColorVarianControllerImpl) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 				Status:  http.StatusInternalServerError,
-				Message: fmt.Sprintf("Failed to create color varian"),
+				Message: "Failed to create color varian",
 			})
 		}
 		var resultSizeVarians []response.SizeVarianResponse
@@ -273,7 +272,7 @@ func (cv *ColorVarianControllerImpl) Update(c *fiber.Ctx) error {
 			if saveErr := c.SaveFile(file, colorVarianPath); saveErr != nil {
 				return c.Status(500).JSON(dto.ErrorResponse{
 					Status:  500,
-					Message: fmt.Sprintf("Failed to save image for color variant"),
+					Message: "Failed to save image for color variant",
 				})
 			}
 		}
@@ -289,7 +288,7 @@ func (cv *ColorVarianControllerImpl) Update(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 				Status:  http.StatusInternalServerError,
-				Message: fmt.Sprintf("Failed to create color varian"),
+				Message: "Failed to create color varian",
 			})
 		}
 		var resultSizeVarians []response.SizeVarianResponse

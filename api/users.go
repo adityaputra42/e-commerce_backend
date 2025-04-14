@@ -181,8 +181,9 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	match, err := helper.CheckPasswordHash(req.Password, user.Password)
-	if !match {
+	match,  err:= helper.CheckPasswordHash(req.Password, user.Password)
+	
+	if !match || err != nil{
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
 			Message: "Password didn't match",
@@ -228,7 +229,7 @@ func (u *UserControllerImpl) UpdatePassword(c *fiber.Ctx) error {
 		})
 	}
 	match, err := helper.CheckPasswordHash(req.OldPassword, user.Password)
-	if !match {
+	if !match || err != nil {
 		return c.Status(http.StatusBadRequest).JSON(dto.ErrorResponse{
 			Status:  http.StatusBadRequest,
 			Message: "hash and password doesn't match",

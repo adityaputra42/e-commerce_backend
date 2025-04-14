@@ -51,7 +51,7 @@ func (server *Server) RouteInit() {
 	Order := NewOrderController(*server)
 	Payment := NewPaymentController(*server)
 
-	api := server.Route.Group("/api/v1")
+	api := server.Route.Group("/api/v1").Use(middleware.LoggerMiddleware)
 
 	{
 		api.Post("/register", User.CreateUser)
