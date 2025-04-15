@@ -39,8 +39,7 @@ func (u *UserControllerImpl) CreateAdmin(c *fiber.Ctx) error {
 		})
 	}
 
-
-	hasPassword, err  := helper.HashPassword(req.Password)
+	hasPassword, err := helper.HashPassword(req.Password)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
@@ -48,7 +47,6 @@ func (u *UserControllerImpl) CreateAdmin(c *fiber.Ctx) error {
 			Message: err.Error(),
 		})
 	}
-
 
 	userParam := db.CreateUserParams{
 		Uid:      helper.Generate("UID"),
@@ -86,7 +84,7 @@ func (u *UserControllerImpl) CreateUser(c *fiber.Ctx) error {
 		})
 	}
 
-	hasPassword, err  := helper.HashPassword(req.Password)
+	hasPassword, err := helper.HashPassword(req.Password)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
@@ -201,17 +199,42 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	err = helper.CheckPassword(req.Password, user.Password);  
-	if err!= nil {
+	err = helper.CheckPassword(req.Password, user.Password)
+	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 		})
 	}
 
+	accessToken, accessPayload, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.AccessTokenDuration)
 
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
 
-	accessToken, _, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.AccessTokenDuration)
+	refreshToken, refreshPayload, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.RefreshTokenDuration)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+	}
+
+	session := db.CreateSessionParams{
+		ID:           refreshPayload.ID,
+		RefreshToken: refreshToken,
+		UserUid:      user.Uid,
+		UserAgent:    "",
+		ClientIp:     "",
+		IsBlocked:    false,
+		ExpiredAt:    refreshPayload.ExpiredAt,
+	}
+	sessionData, err := u.server.Store.CreateSession(c.Context(), session)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
@@ -224,8 +247,12 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		Status:  200,
 		Message: "Success",
 		Data: response.LoginResponse{
-			AccessToken: accessToken,
-			User:        helper.ToUserResponse(user),
+			SessionId:             sessionData.ID,
+			AccessToken:           accessToken,
+			AccessTokenExpiredAt:  accessPayload.ExpiredAt,
+			RefreshToken:          refreshToken,
+			RefreshTokenExpiredAt: refreshPayload.ExpiredAt,
+			User:                  helper.ToUserResponse(user),
 		},
 	})
 }

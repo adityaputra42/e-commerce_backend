@@ -6,6 +6,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
@@ -16,6 +18,7 @@ type Querier interface {
 	CreatePayment(ctx context.Context, arg CreatePaymentParams) (Payment, error)
 	CreatePaymentMethod(ctx context.Context, arg CreatePaymentMethodParams) (PaymentMethod, error)
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (UserSession, error)
 	CreateShipping(ctx context.Context, arg CreateShippingParams) (Shipping, error)
 	CreateSizeVarianProduct(ctx context.Context, arg CreateSizeVarianProductParams) (SizeVarian, error)
 	CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error)
@@ -46,6 +49,7 @@ type Querier interface {
 	GetProduct(ctx context.Context, id int64) (Product, error)
 	GetProductForUpdate(ctx context.Context, id int64) (Product, error)
 	GetProductWithDetail(ctx context.Context, id int64) (GetProductWithDetailRow, error)
+	GetSessionById(ctx context.Context, id uuid.UUID) (UserSession, error)
 	GetShipping(ctx context.Context, id int64) (Shipping, error)
 	GetShippingForUpdate(ctx context.Context, id int64) (Shipping, error)
 	GetSizeVarianProduct(ctx context.Context, id int64) (SizeVarian, error)

@@ -50,6 +50,7 @@ func (server *Server) RouteInit() {
 	Transaction := NewTransactionsController(*server)
 	Order := NewOrderController(*server)
 	Payment := NewPaymentController(*server)
+	Session := NewSessionController(*server)
 
 	api := server.Route.Group("/api/v1").Use(middleware.LoggerMiddleware)
 
@@ -57,6 +58,7 @@ func (server *Server) RouteInit() {
 		api.Post("/register", User.CreateUser)
 		api.Post("/login", User.Login)
 		api.Post("/admin/register", User.CreateAdmin)
+		api.Post("/token/renew_token", Session.RenewSession)
 		api.Get("/categories", Category.GetAll)
 		api.Get("/categories/:id", Category.GetById)
 		api.Get("/Product/:product_id", Product.FetchProduct)
