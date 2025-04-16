@@ -2,8 +2,6 @@ package response
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type UserResponse struct {
@@ -17,10 +15,7 @@ type UserResponse struct {
 }
 
 type LoginResponse struct {
-	SessionId             uuid.UUID    `json:"session_id"`
-	AccessToken           string       `json:"access_token"`
-	AccessTokenExpiredAt  time.Time    `json:"access_token_expired_at"`
-	RefreshToken          string       `json:"refresh_token"`
-	RefreshTokenExpiredAt time.Time    `json:"refresh_token_expired_at"`
-	User                  UserResponse `json:"user"`
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
+	User         UserResponse `json:"user"`
 }

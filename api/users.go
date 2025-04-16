@@ -207,7 +207,7 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		})
 	}
 
-	accessToken, accessPayload, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.AccessTokenDuration)
+	accessToken, _, err := u.server.TokenMaker.CreateToken(user.Username, user.Uid, user.Role, u.server.Config.AccessTokenDuration)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
@@ -234,7 +234,7 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		IsBlocked:    false,
 		ExpiredAt:    refreshPayload.ExpiredAt,
 	}
-	sessionData, err := u.server.Store.CreateSession(c.Context(), session)
+	_, err = u.server.Store.CreateSession(c.Context(), session)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(dto.ErrorResponse{
@@ -247,12 +247,9 @@ func (u *UserControllerImpl) Login(c *fiber.Ctx) error {
 		Status:  200,
 		Message: "Success",
 		Data: response.LoginResponse{
-			SessionId:             sessionData.ID,
-			AccessToken:           accessToken,
-			AccessTokenExpiredAt:  accessPayload.ExpiredAt,
-			RefreshToken:          refreshToken,
-			RefreshTokenExpiredAt: refreshPayload.ExpiredAt,
-			User:                  helper.ToUserResponse(user),
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+			User:         helper.ToUserResponse(user),
 		},
 	})
 }
